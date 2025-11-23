@@ -157,7 +157,7 @@
         .left-panel {
             position: sticky;
             top: 20px;
-            width: 600px;
+            width: 500px;
             flex-shrink: 0;
         }
         
@@ -167,8 +167,8 @@
         }
         
         .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
         
@@ -208,6 +208,10 @@
         
         .chart-widget {
             width: 100%;
+            height: 380px;
+        }
+        
+        .chart-widget.right-chart {
             height: 450px;
         }
         
@@ -241,8 +245,10 @@
                 width: 100%;
             }
             
-            .charts-grid {
+            .left-charts {
+                display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 20px;
             }
         }
         
@@ -317,7 +323,7 @@
         </div>
         
         <div class="info">
-            💡 <strong>提示：</strong>左側固定顯示 BTC 和 ETH 主要交易對，右側顯示其他加密貨幣。滾動頁面時左側圖表會保持固定位置，方便您隨時監控主要標的。
+            💡 <strong>提示：</strong>左側固定顯示 BTC 和 ETH 主要交易對，右側每行顯示一個交易對。所有圖表已添加 SMA 30（藍色）、SMA 45（橘色）、SMA 60（紫色）技術指標，方便分析趨勢。
         </div>
     </div>
 
@@ -380,7 +386,7 @@
             header.innerHTML = `<span>${symbol}</span><span>Binance ${isFeatured ? '⭐' : ''}</span>`;
             
             const chartDiv = document.createElement('div');
-            chartDiv.className = 'chart-widget';
+            chartDiv.className = isFeatured ? 'chart-widget' : 'chart-widget right-chart';
             chartDiv.id = `chart_${symbol}`;
             
             card.appendChild(header);
@@ -430,7 +436,19 @@
                             "hide_legend": false,
                             "save_image": false,
                             "container_id": `chart_${symbol}`,
-                            "studies": ["MASimple@tv-basicstudies"],
+                            "studies": [
+                                "MASimple@tv-basicstudies",
+                                "MASimple@tv-basicstudies",
+                                "MASimple@tv-basicstudies"
+                            ],
+                            "studies_overrides": {
+                                "moving average.length": 30,
+                                "moving average.plot.color": "#2196F3",
+                                "moving average (1).length": 45,
+                                "moving average (1).plot.color": "#FF9800",
+                                "moving average (2).length": 60,
+                                "moving average (2).plot.color": "#9C27B0"
+                            },
                             "disabled_features": ["use_localstorage"],
                             "enabled_features": ["study_templates"]
                         });
@@ -467,7 +485,19 @@
                             "hide_legend": false,
                             "save_image": false,
                             "container_id": `chart_${symbol}`,
-                            "studies": [],
+                            "studies": [
+                                "MASimple@tv-basicstudies",
+                                "MASimple@tv-basicstudies",
+                                "MASimple@tv-basicstudies"
+                            ],
+                            "studies_overrides": {
+                                "moving average.length": 30,
+                                "moving average.plot.color": "#2196F3",
+                                "moving average (1).length": 45,
+                                "moving average (1).plot.color": "#FF9800",
+                                "moving average (2).length": 60,
+                                "moving average (2).plot.color": "#9C27B0"
+                            },
                             "disabled_features": ["use_localstorage"],
                             "enabled_features": ["study_templates"]
                         });
