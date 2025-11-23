@@ -492,18 +492,23 @@
                             "hide_legend": true,
                             "save_image": false,
                             "container_id": `chart_${symbol}`,
+                            "studies": [
+                                "MASimple@tv-basicstudies"
+                            ],
                             "disabled_features": [
                                 "use_localstorage",
                                 "header_widget",
                                 "left_toolbar",
-                                "timeframes_toolbar",
-                                "display_market_status",
-                                "legend_widget"
+                                "timeframes_toolbar"
                             ],
                             "enabled_features": ["hide_left_toolbar_by_default"],
                             "overrides": {
-                                "mainSeriesProperties.showCountdown": false,
-                                "paneProperties.legendProperties.showLegend": false
+                                "mainSeriesProperties.showCountdown": false
+                            },
+                            "studies_overrides": {
+                                "moving average.length": 30,
+                                "moving average.plot.color.0": "#2196F3",
+                                "moving average.plot.linewidth": 2
                             },
                             "loading_screen": { "backgroundColor": "#ffffff" }
                         });
@@ -511,22 +516,16 @@
                         widget.onChartReady(() => {
                             const chart = widget.activeChart();
                             
-                            // 添加 MA 30 (藍色)
-                            chart.createStudy('Moving Average', false, false, { length: 30 }, {
-                                'Plot.color': '#2196F3',
-                                'Plot.linewidth': 2
-                            });
-                            
                             // 添加 MA 45 (黃色)
-                            chart.createStudy('Moving Average', false, false, { length: 45 }, {
-                                'Plot.color': '#FFEB3B',
-                                'Plot.linewidth': 2
+                            chart.createStudy('Moving Average', false, false, [45], null, {
+                                'plot.color': '#FFEB3B',
+                                'plot.linewidth': 2
                             });
                             
                             // 添加 MA 60 (橘色)
-                            chart.createStudy('Moving Average', false, false, { length: 60 }, {
-                                'Plot.color': '#FF9800',
-                                'Plot.linewidth': 2
+                            chart.createStudy('Moving Average', false, false, [60], null, {
+                                'plot.color': '#FF9800',
+                                'plot.linewidth': 2
                             });
                         });
                         
@@ -562,18 +561,23 @@
                             "hide_legend": true,
                             "save_image": false,
                             "container_id": `chart_${symbol}`,
+                            "studies": [
+                                "MASimple@tv-basicstudies"
+                            ],
                             "disabled_features": [
                                 "use_localstorage",
                                 "header_widget",
                                 "left_toolbar",
-                                "timeframes_toolbar",
-                                "display_market_status",
-                                "legend_widget"
+                                "timeframes_toolbar"
                             ],
                             "enabled_features": ["hide_left_toolbar_by_default"],
                             "overrides": {
-                                "mainSeriesProperties.showCountdown": false,
-                                "paneProperties.legendProperties.showLegend": false
+                                "mainSeriesProperties.showCountdown": false
+                            },
+                            "studies_overrides": {
+                                "moving average.length": 30,
+                                "moving average.plot.color.0": "#2196F3",
+                                "moving average.plot.linewidth": 2
                             },
                             "loading_screen": { "backgroundColor": "#ffffff" }
                         });
@@ -581,22 +585,16 @@
                         widget.onChartReady(() => {
                             const chart = widget.activeChart();
                             
-                            // 添加 MA 30 (藍色)
-                            chart.createStudy('Moving Average', false, false, { length: 30 }, {
-                                'Plot.color': '#2196F3',
-                                'Plot.linewidth': 2
-                            });
-                            
                             // 添加 MA 45 (黃色)
-                            chart.createStudy('Moving Average', false, false, { length: 45 }, {
-                                'Plot.color': '#FFEB3B',
-                                'Plot.linewidth': 2
+                            chart.createStudy('Moving Average', false, false, [45], null, {
+                                'plot.color': '#FFEB3B',
+                                'plot.linewidth': 2
                             });
                             
                             // 添加 MA 60 (橘色)
-                            chart.createStudy('Moving Average', false, false, { length: 60 }, {
-                                'Plot.color': '#FF9800',
-                                'Plot.linewidth': 2
+                            chart.createStudy('Moving Average', false, false, [60], null, {
+                                'plot.color': '#FF9800',
+                                'plot.linewidth': 2
                             });
                         });
                         
