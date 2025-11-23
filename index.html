@@ -359,7 +359,7 @@
         </div>
         
         <div class="info">
-            💡 <strong>提示：</strong>左側固定顯示 BTC 和 ETH 主要交易對，右側每頁顯示 20 個交易對。所有圖表已添加 SMA 30、SMA 45、SMA 60 技術指標，方便分析趨勢。使用上下頁按鈕查看更多交易對。
+            💡 <strong>提示：</strong>左側固定顯示 BTC 和 ETH 主要交易對，右側每頁顯示 20 個交易對。所有圖表已添加 SMA 30（藍色）、SMA 45（黃色）、SMA 60（橘色）技術指標，圖表顯示載入時的快照狀態。使用上下頁按鈕查看更多交易對。
         </div>
     </div>
 
@@ -489,25 +489,45 @@
                             "toolbar_bg": "#f1f3f6",
                             "enable_publishing": false,
                             "hide_top_toolbar": false,
-                            "hide_legend": false,
+                            "hide_legend": true,
                             "save_image": false,
                             "container_id": `chart_${symbol}`,
-                            "studies": [
-                                {
-                                    "id": "MASimple@tv-basicstudies",
-                                    "inputs": { "length": 30 }
-                                },
-                                {
-                                    "id": "MASimple@tv-basicstudies", 
-                                    "inputs": { "length": 45 }
-                                },
-                                {
-                                    "id": "MASimple@tv-basicstudies",
-                                    "inputs": { "length": 60 }
-                                }
+                            "disabled_features": [
+                                "use_localstorage",
+                                "header_widget",
+                                "left_toolbar",
+                                "timeframes_toolbar",
+                                "display_market_status",
+                                "legend_widget"
                             ],
-                            "disabled_features": ["use_localstorage"],
-                            "enabled_features": ["study_templates"]
+                            "enabled_features": ["hide_left_toolbar_by_default"],
+                            "overrides": {
+                                "mainSeriesProperties.showCountdown": false,
+                                "paneProperties.legendProperties.showLegend": false
+                            },
+                            "loading_screen": { "backgroundColor": "#ffffff" }
+                        });
+                        
+                        widget.onChartReady(() => {
+                            const chart = widget.activeChart();
+                            
+                            // 添加 MA 30 (藍色)
+                            chart.createStudy('Moving Average', false, false, { length: 30 }, {
+                                'Plot.color': '#2196F3',
+                                'Plot.linewidth': 2
+                            });
+                            
+                            // 添加 MA 45 (黃色)
+                            chart.createStudy('Moving Average', false, false, { length: 45 }, {
+                                'Plot.color': '#FFEB3B',
+                                'Plot.linewidth': 2
+                            });
+                            
+                            // 添加 MA 60 (橘色)
+                            chart.createStudy('Moving Average', false, false, { length: 60 }, {
+                                'Plot.color': '#FF9800',
+                                'Plot.linewidth': 2
+                            });
                         });
                         
                         widgets.push(widget);
@@ -539,25 +559,45 @@
                             "toolbar_bg": "#f1f3f6",
                             "enable_publishing": false,
                             "hide_top_toolbar": false,
-                            "hide_legend": false,
+                            "hide_legend": true,
                             "save_image": false,
                             "container_id": `chart_${symbol}`,
-                            "studies": [
-                                {
-                                    "id": "MASimple@tv-basicstudies",
-                                    "inputs": { "length": 30 }
-                                },
-                                {
-                                    "id": "MASimple@tv-basicstudies",
-                                    "inputs": { "length": 45 }
-                                },
-                                {
-                                    "id": "MASimple@tv-basicstudies",
-                                    "inputs": { "length": 60 }
-                                }
+                            "disabled_features": [
+                                "use_localstorage",
+                                "header_widget",
+                                "left_toolbar",
+                                "timeframes_toolbar",
+                                "display_market_status",
+                                "legend_widget"
                             ],
-                            "disabled_features": ["use_localstorage"],
-                            "enabled_features": ["study_templates"]
+                            "enabled_features": ["hide_left_toolbar_by_default"],
+                            "overrides": {
+                                "mainSeriesProperties.showCountdown": false,
+                                "paneProperties.legendProperties.showLegend": false
+                            },
+                            "loading_screen": { "backgroundColor": "#ffffff" }
+                        });
+                        
+                        widget.onChartReady(() => {
+                            const chart = widget.activeChart();
+                            
+                            // 添加 MA 30 (藍色)
+                            chart.createStudy('Moving Average', false, false, { length: 30 }, {
+                                'Plot.color': '#2196F3',
+                                'Plot.linewidth': 2
+                            });
+                            
+                            // 添加 MA 45 (黃色)
+                            chart.createStudy('Moving Average', false, false, { length: 45 }, {
+                                'Plot.color': '#FFEB3B',
+                                'Plot.linewidth': 2
+                            });
+                            
+                            // 添加 MA 60 (橘色)
+                            chart.createStudy('Moving Average', false, false, { length: 60 }, {
+                                'Plot.color': '#FF9800',
+                                'Plot.linewidth': 2
+                            });
                         });
                         
                         widgets.push(widget);
