@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance 所有 USDT 交易對圖表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            font-size: 12px;
+            color: #4a5568;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+        
+        select:hover {
+            border-color: #667eea;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .progress-container {
+            width: 100%;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 1;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+        }
+        
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chart-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chart-widget {
+            width: 100%;
+            height: 400px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: #4a5568;
+            font-size: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 22px;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-widget {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>📈 Binance 所有 USDT 交易對圖表</h1>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>時間週期</label>
+                        <select id="intervalSelect">
+                            <option value="15">15 分鐘</option>
+                            <option value="30">30 分鐘</option>
+                            <option value="60" selected>1 小時</option>
+                            <option value="240">4 小時</option>
+                        </select>
+                    </div>
+                    <button id="loadButton">🚀 載入圖表</button>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;">
+                        <span id="progressPercentage"></span>
+                    </div>
+                    <div class="progress-text" id="progressText">點擊「載入圖表」開始</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chartsContainer" class="charts-grid">
+            <div class="loading">正在載入圖表...</div>
+        </div>
+        
+        <div class="info">
+            💡 <strong>提示：</strong>顯示 Binance 所有主要 USDT 交易對的即時圖表，使用 TradingView 提供的專業技術分析工具
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // Binance 主要 USDT 交易對列表
+        const symbols = [
+            'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
+            'ADAUSDT', 'DOGEUSDT', 'DOTUSDT', 'MATICUSDT', 'AVAXUSDT',
+            'LINKUSDT', 'UNIUSDT', 'ATOMUSDT', 'LTCUSDT', 'TRXUSDT',
+            'ETCUSDT', 'XLMUSDT', 'NEARUSDT', 'ALGOUSDT', 'FILUSDT',
+            'VETUSDT', 'ICPUSDT', 'APTUSDT', 'ARBUSDT', 'OPUSDT',
+            'INJUSDT', 'SUIUSDT', 'HBARUSDT', 'FTMUSDT', 'SEIUSDT',
+            'TIAUSDT', 'PEPEUSDT', 'WLDUSDT', 'RNDRUSDT', 'IMXUSDT',
+            'STXUSDT', 'TAOUSDT', 'RENDERUSDT', 'FETUSDT', 'ARUSDT',
+            'SANDUSDT', 'MANAUSDT', 'AXSUSDT', 'THETAUSDT', 'GRTUSDT',
+            'ENSUSDT', 'CHZUSDT', 'RUNEUSDT', 'FLOWUSDT', 'BEAMUSDT',
+            'ZILUSDT', 'FLOKIUSDT', 'LDOUSDT', 'MKRUSDT', 'KAVAUSDT',
+            'JASMYUSDT', '1INCHUSDT', 'SUSHIUSDT', 'BLURUSDT', 'APEUSDT'
+        ];
+        
+        let widgets = [];
+        let isLoading = false;
+        
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressPercentage = document.getElementById('progressPercentage');
+            
+            progressFill.style.width = percentage + '%';
+            progressText.textContent = `載入中：${current} / ${total} (${percentage}%)`;
+            
+            if (percentage > 50) {
+                progressPercentage.textContent = `${percentage}%`;
+                progressText.style.color = 'transparent';
+            } else {
+                progressPercentage.textContent = '';
+                progressText.style.color = '#2d3748';
+            }
+            
+            if (current === total) {
+                setTimeout(() => {
+                    progressText.textContent = `✓ 完成！已載入 ${total} 個圖表`;
+                    progressText.style.color = 'white';
+                }, 300);
+            }
+        }
+        
+        function createChart(symbol, interval) {
+            const card = document.createElement('div');
+            card.className = 'chart-card';
+            
+            const header = document.createElement('div');
+            header.className = 'chart-header';
+            header.innerHTML = `<span>${symbol}</span><span>Binance</span>`;
+            
+            const chartDiv = document.createElement('div');
+            chartDiv.className = 'chart-widget';
+            chartDiv.id = `chart_${symbol}`;
+            
+            card.appendChild(header);
+            card.appendChild(chartDiv);
+            
+            return card;
+        }
+        
+        function initCharts() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            const loadButton = document.getElementById('loadButton');
+            loadButton.disabled = true;
+            loadButton.textContent = '⏳ 載入中...';
+            
+            const interval = document.getElementById('intervalSelect').value;
+            const container = document.getElementById('chartsContainer');
+            container.innerHTML = '';
+            widgets = [];
+            
+            updateProgress(0, symbols.length);
+            
+            let loadedCount = 0;
+            
+            symbols.forEach((symbol, index) => {
+                const card = createChart(symbol, interval);
+                container.appendChild(card);
+                
+                // 使用 setTimeout 避免同時載入太多圖表
+                setTimeout(() => {
+                    try {
+                        const widget = new TradingView.widget({
+                            "autosize": true,
+                            "symbol": "BINANCE:" + symbol,
+                            "interval": interval,
+                            "timezone": "Asia/Taipei",
+                            "theme": "light",
+                            "style": "1",
+                            "locale": "zh_TW",
+                            "toolbar_bg": "#f1f3f6",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "container_id": `chart_${symbol}`,
+                            "studies": [],
+                            "disabled_features": ["use_localstorage"],
+                            "enabled_features": ["study_templates"]
+                        });
+                        
+                        widgets.push(widget);
+                        loadedCount++;
+                        updateProgress(loadedCount, symbols.length);
+                        
+                        if (loadedCount === symbols.length) {
+                            isLoading = false;
+                            loadButton.disabled = false;
+                            loadButton.textContent = '🔄 重新載入';
+                        }
+                    } catch (error) {
+                        console.error(`Error creating chart for ${symbol}:`, error);
+                        loadedCount++;
+                        updateProgress(loadedCount, symbols.length);
+                    }
+                }, index * 200);
+            });
+        }
+        
+        // 等待 TradingView 腳本載入完成
+        function waitForTradingView() {
+            if (typeof TradingView !== 'undefined') {
+                // 設置載入按鈕事件
+                document.getElementById('loadButton').addEventListener('click', initCharts);
+                
+                // 監聽時間週期變化 - 只在圖表已載入時自動重新載入
+                document.getElementById('intervalSelect').addEventListener('change', () => {
+                    if (widgets.length > 0) {
+                        initCharts();
+                    }
+                });
+            } else {
+                setTimeout(waitForTradingView, 100);
+            }
+        }
+        
+        // 頁面載入完成後開始
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', waitForTradingView);
+        } else {
+            waitForTradingView();
+        }
+    </script>
+</body>
+</html>
