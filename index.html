@@ -16,10 +16,11 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
         
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }
         
@@ -147,9 +148,33 @@
             z-index: 1;
         }
         
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .left-panel {
+            position: sticky;
+            top: 20px;
+            width: 600px;
+            flex-shrink: 0;
+        }
+        
+        .right-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+        }
+        
+        .left-charts {
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
         
@@ -177,9 +202,13 @@
             align-items: center;
         }
         
+        .chart-header.featured {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
         .chart-widget {
             width: 100%;
-            height: 400px;
+            height: 450px;
         }
         
         .loading {
@@ -199,6 +228,22 @@
             color: #4a5568;
             font-size: 14px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 1400px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                position: relative;
+                top: 0;
+                width: 100%;
+            }
+            
+            .charts-grid {
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            }
         }
         
         @media (max-width: 768px) {
@@ -257,20 +302,33 @@
             </div>
         </div>
         
-        <div id="chartsContainer" class="charts-grid">
-            <div class="loading">正在載入圖表...</div>
+        <div class="content-wrapper">
+            <div class="left-panel">
+                <div class="left-charts" id="leftChartsContainer">
+                    <div class="loading">等待載入...</div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div id="rightChartsContainer" class="charts-grid">
+                    <div class="loading">等待載入...</div>
+                </div>
+            </div>
         </div>
         
         <div class="info">
-            💡 <strong>提示：</strong>顯示 Binance 所有主要 USDT 交易對的即時圖表，使用 TradingView 提供的專業技術分析工具
+            💡 <strong>提示：</strong>左側固定顯示 BTC 和 ETH 主要交易對，右側顯示其他加密貨幣。滾動頁面時左側圖表會保持固定位置，方便您隨時監控主要標的。
         </div>
     </div>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // Binance 主要 USDT 交易對列表
-        const symbols = [
-            'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
+        // 左側固定顯示的主要交易對
+        const featuredSymbols = ['BTCUSDT', 'ETHUSDT'];
+        
+        // 右側顯示的其他交易對
+        const otherSymbols = [
+            'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
             'ADAUSDT', 'DOGEUSDT', 'DOTUSDT', 'MATICUSDT', 'AVAXUSDT',
             'LINKUSDT', 'UNIUSDT', 'ATOMUSDT', 'LTCUSDT', 'TRXUSDT',
             'ETCUSDT', 'XLMUSDT', 'NEARUSDT', 'ALGOUSDT', 'FILUSDT',
@@ -284,6 +342,7 @@
             'JASMYUSDT', '1INCHUSDT', 'SUSHIUSDT', 'BLURUSDT', 'APEUSDT'
         ];
         
+        const allSymbols = [...featuredSymbols, ...otherSymbols];
         let widgets = [];
         let isLoading = false;
         
@@ -312,13 +371,13 @@
             }
         }
         
-        function createChart(symbol, interval) {
+        function createChart(symbol, interval, isFeatured = false) {
             const card = document.createElement('div');
             card.className = 'chart-card';
             
             const header = document.createElement('div');
-            header.className = 'chart-header';
-            header.innerHTML = `<span>${symbol}</span><span>Binance</span>`;
+            header.className = isFeatured ? 'chart-header featured' : 'chart-header';
+            header.innerHTML = `<span>${symbol}</span><span>Binance ${isFeatured ? '⭐' : ''}</span>`;
             
             const chartDiv = document.createElement('div');
             chartDiv.className = 'chart-widget';
@@ -339,19 +398,59 @@
             loadButton.textContent = '⏳ 載入中...';
             
             const interval = document.getElementById('intervalSelect').value;
-            const container = document.getElementById('chartsContainer');
-            container.innerHTML = '';
+            const leftContainer = document.getElementById('leftChartsContainer');
+            const rightContainer = document.getElementById('rightChartsContainer');
+            
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
             widgets = [];
             
-            updateProgress(0, symbols.length);
+            updateProgress(0, allSymbols.length);
             
             let loadedCount = 0;
             
-            symbols.forEach((symbol, index) => {
-                const card = createChart(symbol, interval);
-                container.appendChild(card);
+            // 載入左側的 BTC 和 ETH
+            featuredSymbols.forEach((symbol, index) => {
+                const card = createChart(symbol, interval, true);
+                leftContainer.appendChild(card);
                 
-                // 使用 setTimeout 避免同時載入太多圖表
+                setTimeout(() => {
+                    try {
+                        const widget = new TradingView.widget({
+                            "autosize": true,
+                            "symbol": "BINANCE:" + symbol,
+                            "interval": interval,
+                            "timezone": "Asia/Taipei",
+                            "theme": "light",
+                            "style": "1",
+                            "locale": "zh_TW",
+                            "toolbar_bg": "#f1f3f6",
+                            "enable_publishing": false,
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "container_id": `chart_${symbol}`,
+                            "studies": ["MASimple@tv-basicstudies"],
+                            "disabled_features": ["use_localstorage"],
+                            "enabled_features": ["study_templates"]
+                        });
+                        
+                        widgets.push(widget);
+                        loadedCount++;
+                        updateProgress(loadedCount, allSymbols.length);
+                    } catch (error) {
+                        console.error(`Error creating chart for ${symbol}:`, error);
+                        loadedCount++;
+                        updateProgress(loadedCount, allSymbols.length);
+                    }
+                }, index * 200);
+            });
+            
+            // 載入右側的其他交易對
+            otherSymbols.forEach((symbol, index) => {
+                const card = createChart(symbol, interval, false);
+                rightContainer.appendChild(card);
+                
                 setTimeout(() => {
                     try {
                         const widget = new TradingView.widget({
@@ -375,9 +474,9 @@
                         
                         widgets.push(widget);
                         loadedCount++;
-                        updateProgress(loadedCount, symbols.length);
+                        updateProgress(loadedCount, allSymbols.length);
                         
-                        if (loadedCount === symbols.length) {
+                        if (loadedCount === allSymbols.length) {
                             isLoading = false;
                             loadButton.disabled = false;
                             loadButton.textContent = '🔄 重新載入';
@@ -385,9 +484,9 @@
                     } catch (error) {
                         console.error(`Error creating chart for ${symbol}:`, error);
                         loadedCount++;
-                        updateProgress(loadedCount, symbols.length);
+                        updateProgress(loadedCount, allSymbols.length);
                     }
-                }, index * 200);
+                }, (index + featuredSymbols.length) * 200);
             });
         }
         
