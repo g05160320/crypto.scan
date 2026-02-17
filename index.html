@@ -2,208 +2,650 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>合約篩選器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>合約掃圖篩選器</title>
   <!-- 使用 4.2.3（有 addCandlestickSeries） -->
   <script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-base:       #030508;
+      --bg-surface:    #080d14;
+      --bg-card:       #0b1220;
+      --bg-hover:      #101c2e;
+      --border-dim:    rgba(30, 90, 160, 0.18);
+      --border-bright: rgba(40, 130, 220, 0.35);
+      --accent-blue:   #1a7fd4;
+      --accent-cyan:   #00c8e0;
+      --accent-glow:   rgba(26, 127, 212, 0.25);
+      --text-primary:  #dce8f5;
+      --text-secondary:#7a9abf;
+      --text-dim:      #3d5a7a;
+      --up-color:      #00e5a0;
+      --down-color:    #ff4560;
+      --flat-color:    #556a82;
+      --font-mono:     'Space Mono', monospace;
+      --font-ui:       'Noto Sans TC', sans-serif;
+      --header-h:      54px;
+      --chart-h:       350px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
     body {
       margin: 0;
       padding: 0;
-      background: #050505;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      /* prevent horizontal overflow on mobile */
+      overflow-x: hidden;
     }
 
+    /* ═══════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════ */
     header {
       position: sticky;
       top: 0;
-      z-index: 10;
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(6px);
-      padding: 10px 16px;
-      border-bottom: 1px solid #333;
+      z-index: 100;
+      background: rgba(3, 5, 8, 0.94);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border-bottom: 1px solid var(--border-dim);
+      box-shadow: 0 1px 30px rgba(0,0,0,0.6), 0 0 0 1px rgba(26,127,212,0.05);
+      /* flex column to stack rows */
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-blue), var(--accent-cyan), transparent);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* ── Title row ── */
+    .header-title-row {
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px 0;
       gap: 8px;
     }
 
     h1 {
-      font-size: 16px;
-      margin: 0 12px 0 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0;
       white-space: nowrap;
+      color: var(--text-primary);
+      text-shadow: 0 0 20px rgba(0, 200, 224, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    h1::before {
+      content: '◈';
+      color: var(--accent-cyan);
+      font-size: 11px;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ── Status (sits in title row on desktop, standalone row on mobile) ── */
+    #status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      letter-spacing: 0.03em;
+      opacity: 0.85;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 340px;
+    }
+
+    /* ── Controls row ── */
+    .header-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+      padding: 8px 16px 10px;
+    }
+
+    /* ── Each control group (label + select) ── */
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ── Page nav group ── */
+    .ctrl-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
     }
 
     label {
-      font-size: 14px;
-      margin-right: 4px;
-    }
-
-    select, button {
-      padding: 4px 8px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: 1px solid #555;
-      background: #111;
-      color: #eee;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
-
-    button:hover:not(:disabled) {
-      background: #222;
-    }
-
-    #status {
-      font-size: 12px;
-      color: #ccc;
-      margin-left: auto;
-      min-width: 220px;
-      text-align: right;
-    }
-
-    #page-info {
-      font-size: 12px;
-      color: #ccc;
-      margin-left: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-dim);
       white-space: nowrap;
     }
 
-    /* 一列一個 K 線圖，置中，兩邊等距 */
+    select {
+      padding: 5px 26px 5px 9px;
+      font-size: 12px;
+      font-family: var(--font-ui);
+      border-radius: 6px;
+      border: 1px solid var(--border-dim);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231a7fd4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      /* prevent too-narrow selects on mobile */
+      min-width: 0;
+    }
+    select:hover, select:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    button {
+      padding: 5px 13px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.04em;
+      border-radius: 6px;
+      border: 1px solid var(--border-dim);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      outline: none;
+      transition: all 0.18s ease;
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+      /* comfortable tap target on mobile */
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 50%, rgba(26,127,212,0.08) 100%);
+      pointer-events: none;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--bg-hover);
+      border-color: var(--accent-blue);
+      color: var(--text-primary);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    button:active:not(:disabled) { transform: scale(0.96); }
+
+    button:disabled {
+      opacity: 0.22;
+      cursor: not-allowed;
+    }
+
+    #scan-btn {
+      background: linear-gradient(135deg, #0f3a6e, #1a5fa0);
+      border-color: var(--accent-blue);
+      color: #b8d9f8;
+      font-weight: 700;
+      padding: 5px 16px;
+      box-shadow: 0 0 18px rgba(26,127,212,0.2);
+    }
+    #scan-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #1a5fa0, #1a7fd4);
+      color: #fff;
+      box-shadow: 0 0 28px rgba(26,127,212,0.45);
+    }
+
+    #page-info, #bottom-page-info {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+
+    /* ═══════════════════════════════════════
+       CHARTS GRID
+    ═══════════════════════════════════════ */
     #charts {
-      padding: 12px 12px 80px 12px;
+      padding: 16px 12px 90px;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: 16px;
-      justify-content: center;
+      gap: 14px;
     }
 
     .chart-wrapper {
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 10px;
-      background: #080808;
-      width: 90%;
+      border: 1px solid var(--border-dim);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: var(--bg-card);
+      width: 100%;
       max-width: 2000px;
       box-sizing: border-box;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
       margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
     }
+
+    .chart-wrapper::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(26,127,212,0.5), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .chart-wrapper:hover {
+      border-color: var(--border-bright);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(26,127,212,0.1);
+    }
+
+    .chart-wrapper:hover::before { opacity: 1; }
 
     .chart-title {
       font-size: 13px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: #f5f5f5;
+      gap: 8px;
+    }
+
+    .chart-title-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .chart-symbol {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
     }
 
     .chart-sub {
-      font-size: 11px;
-      color: #999;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .chart {
       width: 100%;
-      height: 350px;
+      height: var(--chart-h);
+      border-radius: 6px;
+      overflow: hidden;
+      /* prevent scroll capture on mobile */
+      touch-action: pan-y;
     }
 
     .chart-pct {
-      margin-left: 6px;
+      font-family: var(--font-mono);
       font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
     }
 
     .chart-pct.up {
-      color: #16c784;
+      color: var(--up-color);
+      background: rgba(0, 229, 160, 0.1);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      text-shadow: 0 0 8px rgba(0, 229, 160, 0.3);
     }
-
     .chart-pct.down {
-      color: #ff4d4d;
+      color: var(--down-color);
+      background: rgba(255, 69, 96, 0.1);
+      border: 1px solid rgba(255, 69, 96, 0.2);
+      text-shadow: 0 0 8px rgba(255, 69, 96, 0.25);
     }
-
     .chart-pct.flat {
-      color: #aaaaaa;
+      color: var(--flat-color);
+      background: rgba(85, 106, 130, 0.1);
+      border: 1px solid rgba(85, 106, 130, 0.2);
     }
 
-    /* 底部分頁區 */
+    /* ═══════════════════════════════════════
+       BOTTOM NAV FOOTER
+    ═══════════════════════════════════════ */
     #bottom-nav {
-      padding: 10px 16px 16px 16px;
-      border-top: 1px solid #333;
+      padding: 10px 20px 14px;
+      border-top: 1px solid var(--border-dim);
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8px;
-      background: #050505;
+      gap: 10px;
+      background: rgba(3, 5, 8, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       position: sticky;
       bottom: 0;
-      z-index: 5;
+      z-index: 50;
+      box-shadow: 0 -1px 20px rgba(0,0,0,0.5);
     }
 
-    #bottom-page-info {
-      font-size: 12px;
-      color: #ccc;
-      white-space: nowrap;
+    #bottom-nav::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* ═══════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE — TABLET  ≥ 640px
+    ═══════════════════════════════════════ */
+    @media (min-width: 640px) {
+      #charts {
+        padding: 16px 16px 90px;
+        gap: 16px;
+      }
+      .chart-wrapper {
+        width: 95%;
+      }
+    }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE — DESKTOP  ≥ 1024px
+    ═══════════════════════════════════════ */
+    @media (min-width: 1024px) {
+      header {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 0 20px;
+        min-height: var(--header-h);
+      }
+
+      /* hide rows, revert to flat flex */
+      .header-title-row,
+      .header-controls-row {
+        display: contents; /* flatten into single flex context */
+      }
+
+      h1 {
+        margin: 0 14px 0 0;
+        order: 0;
+      }
+
+      .ctrl-group { order: 1; }
+
+      #scan-btn { order: 2; }
+
+      .ctrl-nav {
+        order: 3;
+        margin-left: 0;
+      }
+
+      #status {
+        order: 99;
+        margin-left: auto;
+        max-width: 360px;
+        text-align: right;
+      }
+
+      #charts {
+        padding: 20px 16px 90px;
+      }
+
+      .chart-wrapper {
+        width: 90%;
+      }
+    }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE — MOBILE  ≤ 639px
+    ═══════════════════════════════════════ */
+    @media (max-width: 639px) {
+      :root { --chart-h: 240px; }
+
+      header {
+        padding: 0;
+      }
+
+      .header-title-row {
+        padding: 10px 14px 0;
+        gap: 6px;
+      }
+
+      /* On mobile status goes below title row */
+      #status {
+        order: 10;
+        max-width: 100%;
+        text-align: left;
+        font-size: 10px;
+        padding: 0 14px 6px;
+        opacity: 0.75;
+        white-space: normal;
+        line-height: 1.4;
+      }
+
+      .header-controls-row {
+        padding: 6px 14px 10px;
+        gap: 6px;
+        /* two-column grid for controls */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+      }
+
+      .ctrl-group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        width: 100%;
+      }
+
+      .ctrl-group select {
+        flex: 1;
+        min-width: 0;
+        font-size: 13px;
+        padding: 7px 26px 7px 9px;
+      }
+
+      /* scan button spans full width */
+      #scan-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+        padding: 9px;
+        font-size: 13px;
+      }
+
+      /* nav group spans full width, centered */
+      .ctrl-nav {
+        grid-column: 1 / -1;
+        justify-content: center;
+        margin-left: 0;
+        gap: 8px;
+      }
+
+      .ctrl-nav button {
+        flex: 1;
+        padding: 7px 8px;
+        font-size: 12px;
+      }
+
+      #page-info {
+        font-size: 10px;
+        text-align: center;
+      }
+
+      #charts {
+        padding: 10px 8px 80px;
+        gap: 10px;
+      }
+
+      .chart-wrapper {
+        width: 100%;
+        border-radius: 10px;
+        padding: 10px 10px;
+      }
+
+      .chart-symbol { font-size: 12px; }
+      .chart-pct    { font-size: 10px; padding: 1px 5px; }
+      .chart-sub    { font-size: 9px; }
+
+      #bottom-nav {
+        padding: 8px 12px 12px;
+        gap: 8px;
+      }
+
+      #bottom-nav button {
+        flex: 1;
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+
+      #bottom-page-info {
+        font-size: 10px;
+        flex-shrink: 0;
+      }
+    }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE — SMALL MOBILE  ≤ 374px
+    ═══════════════════════════════════════ */
+    @media (max-width: 374px) {
+      :root { --chart-h: 200px; }
+
+      h1 { font-size: 11px; }
+
+      .header-controls-row {
+        grid-template-columns: 1fr;
+      }
+
+      .ctrl-nav {
+        grid-column: 1;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>合約掃圖篩選器</h1>
+    <!-- Title row: logo + status -->
+    <div class="header-title-row">
+      <h1>合約掃圖篩選器</h1>
+      <div id="status">尚未掃圖</div>
+    </div>
 
-    <label for="exchange">交易所：</label>
-    <select id="exchange">
-      <option value="binance">Binance</option>
-      <option value="okx">OKX</option>
-      <option value="bybit">Bybit</option>
-      <option value="bitget">Bitget</option>
-      <option value="bingx">BingX</option>
-    </select>
+    <!-- Controls row: selects + buttons -->
+    <div class="header-controls-row">
+      <div class="ctrl-group">
+        <label for="exchange">交易所</label>
+        <select id="exchange">
+          <option value="binance">Binance</option>
+          <option value="okx">OKX</option>
+          <option value="bybit">Bybit</option>
+          <option value="bitget">Bitget</option>
+          <option value="bingx">BingX</option>
+        </select>
+      </div>
 
-    <label for="mode">模式：</label>
-    <select id="mode">
-      <option value="scan">掃圖（全部）</option>
-      <option value="filter">篩選（突破）</option>
-      <option value="diverge">篩選（發散）</option>
-    </select>
+      <div class="ctrl-group">
+        <label for="mode">模式</label>
+        <select id="mode">
+          <option value="scan">掃圖（全部）</option>
+          <option value="filter">篩選（突破）</option>
+          <option value="diverge">篩選（發散）</option>
+        </select>
+      </div>
 
-    <label for="interval">時框：</label>
-    <select id="interval">
-      <option value="15m">15 分 K</option>
-      <option value="1h">1 小時 K</option>
-      <option value="4h">4 小時 K</option>
-      <option value="1d">1 日 K</option>
-    </select>
+      <div class="ctrl-group">
+        <label for="interval">時框</label>
+        <select id="interval">
+          <option value="15m">15分K</option>
+          <option value="1h">1小時K</option>
+          <option value="4h">4小時K</option>
+          <option value="1d">日K</option>
+        </select>
+      </div>
 
-    <label for="sort">排序：</label>
-    <select id="sort">
-      <option value="symbol">依字母</option>
-      <option value="pct_desc" selected>依 24h 漲跌幅</option>
-    </select>
+      <div class="ctrl-group">
+        <label for="sort">排序</label>
+        <select id="sort">
+          <option value="symbol">字母</option>
+          <option value="pct_desc" selected>漲跌幅</option>
+        </select>
+      </div>
 
-    <button id="scan-btn">開始</button>
+      <button id="scan-btn">▶ 開始</button>
 
-    <button id="prev-btn" disabled>上一頁</button>
-    <button id="next-btn" disabled>下一頁</button>
-    <span id="page-info">第 0 / 0 頁</span>
-
-    <div id="status">尚未掃圖</div>
+      <!-- Page nav -->
+      <div class="ctrl-nav">
+        <button id="prev-btn" disabled>‹ 上頁</button>
+        <span id="page-info">0 / 0</span>
+        <button id="next-btn" disabled>下頁 ›</button>
+      </div>
+    </div>
   </header>
 
   <div id="charts"></div>
 
   <!-- 底部分頁按鈕 -->
   <footer id="bottom-nav">
-    <button id="bottom-prev-btn" disabled>上一頁</button>
-    <span id="bottom-page-info">第 0 / 0 頁</span>
-    <button id="bottom-next-btn" disabled>下一頁</button>
+    <button id="bottom-prev-btn" disabled>‹ 上頁</button>
+    <span id="bottom-page-info">0 / 0</span>
+    <button id="bottom-next-btn" disabled>下頁 ›</button>
   </footer>
 
   <script>
@@ -214,6 +656,13 @@
     // ============================================================
     const PAGE_SIZE = 100;
     const KLINE_LIMIT = 600;
+
+    // 依螢幕寬度回傳適合的圖表高度
+    function getChartHeight() {
+      if (window.innerWidth <= 374) return 200;
+      if (window.innerWidth < 640)  return 240;
+      return 350;
+    }
 
     // ============================================================
     // 各交易所 API 設定
@@ -735,8 +1184,14 @@
       const title = document.createElement("div");
       title.className = "chart-title";
 
-      const left = document.createElement("span");
-      left.textContent = symbol;
+      // Left: symbol + pct badge
+      const left = document.createElement("div");
+      left.className = "chart-title-left";
+
+      const symSpan = document.createElement("span");
+      symSpan.className = "chart-symbol";
+      symSpan.textContent = symbol;
+      left.appendChild(symSpan);
 
       if (typeof changePct === "number" && !Number.isNaN(changePct)) {
         const pctSpan = document.createElement("span");
@@ -745,10 +1200,12 @@
         if (changePct > 0.0001) cls = "up";
         else if (changePct < -0.0001) cls = "down";
         pctSpan.classList.add(cls);
-        pctSpan.textContent = (changePct >= 0 ? "+" : "") + changePct.toFixed(2) + "%";
+        const arrow = cls === "up" ? "▲ " : cls === "down" ? "▼ " : "— ";
+        pctSpan.textContent = arrow + (changePct >= 0 ? "+" : "") + changePct.toFixed(2) + "%";
         left.appendChild(pctSpan);
       }
 
+      // Right: interval label
       const right = document.createElement("span");
       right.className = "chart-sub";
       right.textContent = interval;
@@ -795,17 +1252,19 @@
         const chartDiv = card._chartDiv;
         // 取得容器寬度，依序嘗試自身寬 → 父元素寬 → 預設 320px
         const width = chartDiv.clientWidth || chartDiv.parentElement.clientWidth || 320;
+        const height = getChartHeight();
+        chartDiv.style.height = height + "px";
 
         const chart = LightweightCharts.createChart(chartDiv, {
           width: width,
-          height: 350,
+          height: height,
           layout: {
-            background: { color: "#080808" },
-            textColor: "#dddddd",
+            background: { color: "#0b1220" },
+            textColor: "#7a9abf",
           },
           grid: {
-            vertLines: { color: "#222" },
-            horzLines: { color: "#222" },
+            vertLines: { color: "rgba(30, 90, 160, 0.10)" },
+            horzLines: { color: "rgba(30, 90, 160, 0.10)" },
           },
           timeScale: {
             timeVisible: true,
@@ -840,19 +1299,19 @@
         // upColor/borderUpColor/wickUpColor：陽線（收≥開）的實體、邊框、影線
         // downColor/borderDownColor/wickDownColor：陰線（收<開）的實體、邊框、影線
         const candleSeries = chart.addCandlestickSeries({
-          upColor: "#26a69a",
-          borderUpColor: "#26a69a",
-          wickUpColor: "#26a69a",
-          downColor: "#ef5350",
-          borderDownColor: "#ef5350",
-          wickDownColor: "#ef5350",
+          upColor: "#00e5a0",
+          borderUpColor: "#00e5a0",
+          wickUpColor: "#00e5a0",
+          downColor: "#ff4560",
+          borderDownColor: "#ff4560",
+          wickDownColor: "#ff4560",
         });
         // 逐筆設定每根K棒的顏色（確保顏色正確覆蓋，不受圖表庫預設值影響）
         const coloredData = data.map(bar => ({
           ...bar,
-          color:       bar.close >= bar.open ? "#26a69a" : "#ef5350",
-          borderColor: bar.close >= bar.open ? "#26a69a" : "#ef5350",
-          wickColor:   bar.close >= bar.open ? "#26a69a" : "#ef5350",
+          color:       bar.close >= bar.open ? "#00e5a0" : "#ff4560",
+          borderColor: bar.close >= bar.open ? "#00e5a0" : "#ff4560",
+          wickColor:   bar.close >= bar.open ? "#00e5a0" : "#ff4560",
         }));
         candleSeries.setData(coloredData);
 
@@ -867,7 +1326,7 @@
             const marker = {
               time: bar.time,
               position: "aboveBar",
-              color: "yellow",
+              color: "#00c8e0",
               shape: "arrowDown",
               text: "最高點",
             };
@@ -886,7 +1345,7 @@
         volumeSeries.setData(data.map(bar => ({
           time: bar.time,
           value: bar.volume,
-          color: bar.close >= bar.open ? "#26a69a" : "#ef5350",
+          color: bar.close >= bar.open ? "rgba(0, 229, 160, 0.35)" : "rgba(255, 69, 96, 0.35)",
         })));
         // 成交量佔主圖下方 20%（top: 0.8 = 從 80% 高度開始），不顯示對齊標籤
         chart.priceScale("volume").applyOptions({
@@ -899,11 +1358,11 @@
         const ma45Data = calcMA(data, 45);
         const ma60Data = calcMA(data, 60);
 
-        // 三條均線：MA30（粉紅）/ MA45（橙黃）/ MA60（綠），共用主圖右側價格軸
+        // 三條均線：MA30（天藍）/ MA45（琥珀）/ MA60（紫），共用主圖右側價格軸
         // priceLineVisible: false → 不顯示最新值的橫線；lastValueVisible: false → 不顯示末端數值標籤
-        const ma30Series = chart.addLineSeries({ color: "#f77c80", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
-        const ma45Series = chart.addLineSeries({ color: "#ffb74d", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
-        const ma60Series = chart.addLineSeries({ color: "#66bb6a", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
+        const ma30Series = chart.addLineSeries({ color: "#38bdf8", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
+        const ma45Series = chart.addLineSeries({ color: "#fbbf24", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
+        const ma60Series = chart.addLineSeries({ color: "#a78bfa", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
 
         if (ma30Data.length) ma30Series.setData(ma30Data);
         if (ma45Data.length) ma45Series.setData(ma45Data);
@@ -956,10 +1415,12 @@
     function updatePaginationUI() {
       const total = allSymbols.length;
       const totalPages = total === 0 ? 0 : Math.ceil(total / PAGE_SIZE); // 總頁數
+      const isMobile = window.innerWidth < 640;
 
       if (totalPages === 0) {
-        pageInfoEl.textContent = "第 0 / 0 頁";
-        bottomPageInfoEl.textContent = "第 0 / 0 頁";
+        const zeroText = isMobile ? "0 / 0" : "第 0 / 0 頁";
+        pageInfoEl.textContent = zeroText;
+        bottomPageInfoEl.textContent = zeroText;
         prevBtn.disabled = true;
         nextBtn.disabled = true;
         bottomPrevBtn.disabled = true;
@@ -969,10 +1430,12 @@
 
       const start = currentPage * PAGE_SIZE + 1;
       const end = Math.min((currentPage + 1) * PAGE_SIZE, total);
-      const text = `第 ${currentPage + 1} / ${totalPages} 頁（${start}–${end} / ${total} 檔）`;
+      const shortText = `${currentPage + 1} / ${totalPages}`;
+      const fullText  = `第 ${currentPage + 1} / ${totalPages} 頁（${start}–${end} / ${total} 檔）`;
+      const text = isMobile ? shortText : fullText;
 
       pageInfoEl.textContent = text;
-      bottomPageInfoEl.textContent = text;
+      bottomPageInfoEl.textContent = isMobile ? shortText : fullText;
 
       prevBtn.disabled = currentPage <= 0;
       nextBtn.disabled = currentPage >= totalPages - 1;
@@ -1145,15 +1608,23 @@
     // ============================================================
     // Resize
     // ============================================================
-    // 視窗尺寸改變時，重新計算並套用每個已建立圖表的寬度
-    // LightweightCharts 不會自動 RWD，需手動觸發 applyOptions 更新寬度
+    // 視窗尺寸改變時，重新計算並套用每個已建立圖表的寬度與高度
+    // LightweightCharts 不會自動 RWD，需手動觸發 applyOptions 更新
+    let resizeTimer;
     window.addEventListener("resize", () => {
-      document.querySelectorAll(".chart-wrapper").forEach(card => {
-        if (card._chartInstance && card._chartDiv) {
-          const newWidth = card._chartDiv.clientWidth || card._chartDiv.parentElement.clientWidth || 320;
-          card._chartInstance.applyOptions({ width: newWidth });
-        }
-      });
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const newHeight = getChartHeight();
+        document.querySelectorAll(".chart-wrapper").forEach(card => {
+          if (card._chartInstance && card._chartDiv) {
+            const newWidth = card._chartDiv.clientWidth || card._chartDiv.parentElement.clientWidth || 320;
+            card._chartInstance.applyOptions({ width: newWidth, height: newHeight });
+            card._chartDiv.style.height = newHeight + "px";
+          }
+        });
+        // Re-render pagination text format for screen size change
+        updatePaginationUI();
+      }, 120);
     });
 
     updatePaginationUI();
