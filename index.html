@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>合約篩選器</title>
+  <title>合約掃圖篩選器</title>
   <!-- 使用 4.2.3（有 addCandlestickSeries） -->
   <script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -604,10 +604,9 @@
       <div class="ctrl-group">
         <label for="mode">模式</label>
         <select id="mode">
-          <option value="diverge">發散篩選</option>
+          <option value="diverge" selected>發散篩選</option>
           <option value="filter">突破篩選</option>
-          <option value="scan">全標的掃圖</option>
-
+          <option value="scan">全標的</option>
         </select>
       </div>
 
@@ -617,7 +616,7 @@
           <option value="15m">15分K</option>
           <option value="1h">1小時K</option>
           <option value="4h">4小時K</option>
-          <option value="1d">1日K</option>
+          <option value="1d">日K</option>
         </select>
       </div>
 
@@ -931,7 +930,7 @@
 
     let currentPage = 0;              // 目前顯示的頁碼（0-based）
     let currentInterval = "15m";      // 目前選擇的K線時框
-    let currentMode = "scan";          // 目前模式：scan（全部）/ filter（突破）/ diverge（發散）
+    let currentMode = "diverge";         // 目前模式：scan（全部）/ filter（突破）/ diverge（發散）
     let currentExchange = "binance";   // 目前選擇的交易所
     let isLoading = false;             // 防止重複點擊「開始」的鎖
     let currentLoadToken = 0;          // 頁面切換時的版本號，用來取消過期的載入任務
@@ -1165,7 +1164,7 @@
           console.error("發散篩選失敗：", sym, e); // 單一標的失敗不中斷整體流程
         }
         checked++;
-        statusEl.textContent = `發散篩選中（${checked} / ${symbols.length}）`; // 即時更新進度
+        statusEl.textContent = `篩選（發散）中（${checked} / ${symbols.length}）`; // 即時更新進度
         await new Promise(r => setTimeout(r)); // 讓瀏覽器有機會更新畫面
       }
       // 依均線增長率平均值（強勢分數）由高到低排序
@@ -1316,7 +1315,7 @@
         }));
         candleSeries.setData(coloredData);
 
-        // 突破箭頭標記（只在突破篩選模式顯示）
+        // 突破箭頭標記（只在篩選（突破）模式顯示）
         // 找出近10根內創近120根新高的那根K棒，在其上方顯示黃色向下箭頭並標示「最高點」
         if (currentMode === "filter") {
           const breakoutIndex = findBreakoutIndex(data);
