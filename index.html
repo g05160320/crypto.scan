@@ -604,9 +604,10 @@
       <div class="ctrl-group">
         <label for="mode">模式</label>
         <select id="mode">
-          <option value="scan">掃圖（全部）</option>
-          <option value="filter">篩選（突破）</option>
-          <option value="diverge">篩選（發散）</option>
+          <option value="diverge">發散篩選</option>
+          <option value="filter">突破篩選</option>
+          <option value="scan">全標的掃圖</option>
+
         </select>
       </div>
 
@@ -616,7 +617,7 @@
           <option value="15m">15分K</option>
           <option value="1h">1小時K</option>
           <option value="4h">4小時K</option>
-          <option value="1d">日K</option>
+          <option value="1d">1日K</option>
         </select>
       </div>
 
@@ -1164,7 +1165,7 @@
           console.error("發散篩選失敗：", sym, e); // 單一標的失敗不中斷整體流程
         }
         checked++;
-        statusEl.textContent = `篩選（發散）中（${checked} / ${symbols.length}）`; // 即時更新進度
+        statusEl.textContent = `發散篩選中（${checked} / ${symbols.length}）`; // 即時更新進度
         await new Promise(r => setTimeout(r)); // 讓瀏覽器有機會更新畫面
       }
       // 依均線增長率平均值（強勢分數）由高到低排序
@@ -1315,7 +1316,7 @@
         }));
         candleSeries.setData(coloredData);
 
-        // 突破箭頭標記（只在篩選（突破）模式顯示）
+        // 突破箭頭標記（只在突破篩選模式顯示）
         // 找出近10根內創近120根新高的那根K棒，在其上方顯示黃色向下箭頭並標示「最高點」
         if (currentMode === "filter") {
           const breakoutIndex = findBreakoutIndex(data);
