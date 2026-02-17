@@ -1,11 +1,8 @@
-
-
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>合約篩選器</title>
+  <title>合約掃圖篩選器</title>
   <!-- 使用 4.2.3（有 addCandlestickSeries） -->
   <script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
   <style>
@@ -839,6 +836,9 @@
           }
         });
 
+        // K棒顏色設定：綠漲（收盤≥開盤）紅跌（收盤<開盤）
+        // upColor/borderUpColor/wickUpColor：陽線（收≥開）的實體、邊框、影線
+        // downColor/borderDownColor/wickDownColor：陰線（收<開）的實體、邊框、影線
         const candleSeries = chart.addCandlestickSeries({
           upColor: "#26a69a",
           borderUpColor: "#26a69a",
@@ -847,7 +847,34 @@
           borderDownColor: "#ef5350",
           wickDownColor: "#ef5350",
         });
-        candleSeries.setData(data);
+        // 逐筆設定每根K棒的顏色（確保顏色正確覆蓋，不受圖表庫預設值影響）
+        const coloredData = data.map(bar => ({
+          ...bar,
+          color:       bar.close >= bar.open ? "#26a69a" : "#ef5350",
+          borderColor: bar.close >= bar.open ? "#26a69a" : "#ef5350",
+          wickColor:   bar.close >= bar.open ? "#26a69a" : "#ef5350",
+        }));
+        candleSeries.setData(coloredData);
+
+        // 突破箭頭標記（只在篩選（突破）模式顯示）
+        // 找出近10根內創近120根新高的那根K棒，在其上方顯示黃色向下箭頭並標示「最高點」
+        if (currentMode === "filter") {
+          const breakoutIndex = findBreakoutIndex(data);
+
+          if (breakoutIndex !== null) {
+            const bar = data[breakoutIndex];
+
+            const marker = {
+              time: bar.time,
+              position: "aboveBar",
+              color: "yellow",
+              shape: "arrowDown",
+              text: "最高點",
+            };
+
+            candleSeries.setMarkers([marker]);
+          }
+        }
 
         // 成交量長條圖：顯示在主圖下方 20% 的區域，顏色與K棒一致（漲綠跌紅）
         const volumeSeries = chart.addHistogramSeries({
