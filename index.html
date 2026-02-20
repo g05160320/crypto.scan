@@ -42,13 +42,9 @@
       color: var(--text-primary);
       font-family: var(--font-ui);
       min-height: 100vh;
-      /* prevent horizontal overflow on mobile */
       overflow-x: hidden;
     }
 
-    /* ═══════════════════════════════════════
-       HEADER
-    ═══════════════════════════════════════ */
     header {
       position: sticky;
       top: 0;
@@ -58,7 +54,6 @@
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       border-bottom: 1px solid var(--border-dim);
       box-shadow: 0 1px 30px rgba(0,0,0,0.6), 0 0 0 1px rgba(26,127,212,0.05);
-      /* flex column to stack rows */
       display: flex;
       flex-direction: column;
     }
@@ -73,7 +68,6 @@
       pointer-events: none;
     }
 
-    /* ── Title row ── */
     .header-title-row {
       display: flex;
       align-items: center;
@@ -109,7 +103,6 @@
       50%       { opacity: 0.3; }
     }
 
-    /* ── Status (sits in title row on desktop, standalone row on mobile) ── */
     #status {
       font-family: var(--font-mono);
       font-size: 11px;
@@ -122,7 +115,6 @@
       max-width: 340px;
     }
 
-    /* ── Controls row ── */
     .header-controls-row {
       display: flex;
       flex-wrap: wrap;
@@ -131,14 +123,12 @@
       padding: 8px 16px 10px;
     }
 
-    /* ── Each control group (label + select) ── */
     .ctrl-group {
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
-    /* ── Page nav group ── */
     .ctrl-nav {
       display: flex;
       align-items: center;
@@ -171,7 +161,6 @@
       background-repeat: no-repeat;
       background-position: right 8px center;
       transition: border-color 0.2s, box-shadow 0.2s;
-      /* prevent too-narrow selects on mobile */
       min-width: 0;
     }
     select:hover, select:focus {
@@ -194,7 +183,6 @@
       position: relative;
       overflow: hidden;
       white-space: nowrap;
-      /* comfortable tap target on mobile */
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
@@ -243,9 +231,6 @@
       letter-spacing: 0.04em;
     }
 
-    /* ═══════════════════════════════════════
-       CHARTS GRID
-    ═══════════════════════════════════════ */
     #charts {
       padding: 16px 12px 90px;
       display: grid;
@@ -323,7 +308,6 @@
       height: var(--chart-h);
       border-radius: 6px;
       overflow: hidden;
-      /* prevent scroll capture on mobile */
       touch-action: pan-y;
     }
 
@@ -355,9 +339,6 @@
       border: 1px solid rgba(85, 106, 130, 0.2);
     }
 
-    /* ═══════════════════════════════════════
-       BOTTOM NAV FOOTER
-    ═══════════════════════════════════════ */
     #bottom-nav {
       padding: 10px 20px 14px;
       border-top: 1px solid var(--border-dim);
@@ -384,17 +365,11 @@
       pointer-events: none;
     }
 
-    /* ═══════════════════════════════════════
-       SCROLLBAR
-    ═══════════════════════════════════════ */
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg-base); }
     ::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
 
-    /* ═══════════════════════════════════════
-       RESPONSIVE — TABLET  ≥ 640px
-    ═══════════════════════════════════════ */
     @media (min-width: 640px) {
       #charts {
         padding: 16px 16px 90px;
@@ -405,9 +380,6 @@
       }
     }
 
-    /* ═══════════════════════════════════════
-       RESPONSIVE — DESKTOP  ≥ 1024px
-    ═══════════════════════════════════════ */
     @media (min-width: 1024px) {
       header {
         flex-direction: row;
@@ -417,10 +389,9 @@
         min-height: var(--header-h);
       }
 
-      /* hide rows, revert to flat flex */
       .header-title-row,
       .header-controls-row {
-        display: contents; /* flatten into single flex context */
+        display: contents;
       }
 
       h1 {
@@ -453,9 +424,6 @@
       }
     }
 
-    /* ═══════════════════════════════════════
-       RESPONSIVE — MOBILE  ≤ 639px
-    ═══════════════════════════════════════ */
     @media (max-width: 639px) {
       :root { --chart-h: 240px; }
 
@@ -468,7 +436,6 @@
         gap: 6px;
       }
 
-      /* On mobile status goes below title row */
       #status {
         order: 10;
         max-width: 100%;
@@ -483,7 +450,6 @@
       .header-controls-row {
         padding: 6px 14px 10px;
         gap: 6px;
-        /* two-column grid for controls */
         display: grid;
         grid-template-columns: 1fr 1fr;
         align-items: center;
@@ -503,7 +469,6 @@
         padding: 7px 26px 7px 9px;
       }
 
-      /* scan button spans full width */
       #scan-btn {
         grid-column: 1 / -1;
         width: 100%;
@@ -511,7 +476,6 @@
         font-size: 13px;
       }
 
-      /* nav group spans full width, centered */
       .ctrl-nav {
         grid-column: 1 / -1;
         justify-content: center;
@@ -562,9 +526,6 @@
       }
     }
 
-    /* ═══════════════════════════════════════
-       RESPONSIVE — SMALL MOBILE  ≤ 374px
-    ═══════════════════════════════════════ */
     @media (max-width: 374px) {
       :root { --chart-h: 200px; }
 
@@ -582,13 +543,11 @@
 </head>
 <body>
   <header>
-    <!-- Title row: logo + status -->
     <div class="header-title-row">
       <h1>合約掃圖篩選器</h1>
       <div id="status">尚未掃圖</div>
     </div>
 
-    <!-- Controls row: selects + buttons -->
     <div class="header-controls-row">
       <div class="ctrl-group">
         <label for="exchange">交易所</label>
@@ -630,7 +589,6 @@
 
       <button id="scan-btn">▶ 開始</button>
 
-      <!-- Page nav -->
       <div class="ctrl-nav">
         <button id="prev-btn" disabled>‹ 上頁</button>
         <span id="page-info">0 / 0</span>
@@ -641,7 +599,6 @@
 
   <div id="charts"></div>
 
-  <!-- 底部分頁按鈕 -->
   <footer id="bottom-nav">
     <button id="bottom-prev-btn" disabled>‹ 上頁</button>
     <span id="bottom-page-info">0 / 0</span>
@@ -649,52 +606,37 @@
   </footer>
 
   <script>
-    // ============================================================
-    // 全域常數
-    // PAGE_SIZE：每頁最多顯示幾個K線圖卡片
-    // KLINE_LIMIT：每次向交易所 API 請求的K線根數上限
-    // ============================================================
     const PAGE_SIZE = 100;
     const KLINE_LIMIT = 600;
 
-    // 依螢幕寬度回傳適合的圖表高度
+    // 成交量爆量倍率閾值：當前K棒成交量 >= 前一根 × 此倍率，K棒實體改為黃色
+    const VOLUME_SURGE_RATIO = 2.5;
+
     function getChartHeight() {
       if (window.innerWidth <= 374) return 200;
       if (window.innerWidth < 640)  return 240;
       return 350;
     }
 
-    // ============================================================
-    // 各交易所 API 設定
-    // 每個交易所物件包含三個方法：
-    //   fetchSymbols   → 取得該交易所所有 USDT 永續合約的標的代碼清單
-    //   fetch24hTickers → 取得所有標的的 24 小時漲跌幅（用於顯示與排序）
-    //   fetchKlines    → 取得指定標的、指定時框的 K 線 OHLCV 資料
-    // intervalMap：將統一時框代碼（15m/1h/4h/1d）對應到各交易所實際 API 參數
-    // ============================================================
     const EXCHANGE_CONFIG = {
       binance: {
         name: "Binance",
         baseUrl: "https://fapi.binance.com",
-        // 時框對應
         intervalMap: { "15m": "15m", "1h": "1h", "4h": "4h", "1d": "1d" },
-        // 取得 Binance 所有「交易中」的 USDT 永續合約代碼清單
         fetchSymbols: async function() {
           const res = await fetch(`${this.baseUrl}/fapi/v1/exchangeInfo`);
           if (!res.ok) throw new Error("Binance exchangeInfo 失敗: " + res.status);
           const data = await res.json();
           return data.symbols
-            // 過濾條件：永續合約 + 報價幣為 USDT + 狀態為上線中
             .filter(s => s.contractType === "PERPETUAL" && s.quoteAsset === "USDT" && s.status === "TRADING")
             .map(s => s.symbol)
             .sort();
         },
-        // 取得所有標的的 24h 漲跌幅，回傳 { symbol: { pct } } 對照表
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/fapi/v1/ticker/24hr`);
           if (!res.ok) throw new Error("Binance 24hr ticker 失敗: " + res.status);
           const data = await res.json();
-          const set = new Set(symbols); // 用 Set 加速查找，避免每筆都掃描整個陣列
+          const set = new Set(symbols);
           const map = {};
           for (const t of data) {
             if (!set.has(t.symbol)) continue;
@@ -703,9 +645,8 @@
           }
           return map;
         },
-        // 取得指定標的、時框的 K 線資料，時間戳除以 1000 轉為秒（圖表函式庫需要）
         fetchKlines: async function(symbol, interval, limit) {
-          const iv = this.intervalMap[interval] || interval; // 轉換為 Binance API 的時框參數
+          const iv = this.intervalMap[interval] || interval;
           const url = `${this.baseUrl}/fapi/v1/klines?symbol=${symbol}&interval=${iv}&limit=${limit}`;
           const res = await fetch(url);
           if (!res.ok) throw new Error(`Binance K線 ${symbol} 失敗: ` + res.status);
@@ -725,25 +666,22 @@
         name: "OKX",
         baseUrl: "https://www.okx.com",
         intervalMap: { "15m": "15m", "1h": "1H", "4h": "4H", "1d": "1D" },
-        // 取得 OKX 所有「上線中」的 USDT 結算永續合約代碼清單
         fetchSymbols: async function() {
           const res = await fetch(`${this.baseUrl}/api/v5/public/instruments?instType=SWAP`);
           if (!res.ok) throw new Error("OKX instruments 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "0") throw new Error("OKX instruments error: " + data.msg);
           return data.data
-            // 過濾：結算幣為 USDT、狀態為 live
             .filter(s => s.settleCcy === "USDT" && s.state === "live")
             .map(s => s.instId)
             .sort();
         },
-        // OKX 不直接提供漲跌幅百分比，用 (最新價 - 24h前開盤) / 24h前開盤 * 100 計算
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/api/v5/market/tickers?instType=SWAP`);
           if (!res.ok) throw new Error("OKX tickers 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "0") throw new Error("OKX tickers error: " + data.msg);
-          const set = new Set(symbols); // 用 Set 加速查找，避免每筆都掃描整個陣列
+          const set = new Set(symbols);
           const map = {};
           for (const t of data.data) {
             if (!set.has(t.instId)) continue;
@@ -763,7 +701,6 @@
           if (!res.ok) throw new Error(`OKX K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.code !== "0") throw new Error("OKX K線 error: " + data.msg);
-          // OKX API 回傳順序是最新K棒在前，必須反轉為時間升冪（舊→新），圖表才能正確繪製
           return data.data.reverse().map(c => ({
             time: parseInt(c[0]) / 1000,
             open: parseFloat(c[1]),
@@ -779,7 +716,6 @@
         name: "Bybit",
         baseUrl: "https://api.bybit.com",
         intervalMap: { "15m": "15", "1h": "60", "4h": "240", "1d": "D" },
-        // 取得 Bybit 所有「交易中」的 USDT 線性永續合約代碼清單
         fetchSymbols: async function() {
           const res = await fetch(`${this.baseUrl}/v5/market/instruments-info?category=linear&limit=1000`);
           if (!res.ok) throw new Error("Bybit instruments 失敗: " + res.status);
@@ -790,13 +726,12 @@
             .map(s => s.symbol)
             .sort();
         },
-        // Bybit 的 price24hPcnt 為小數（如 0.05 代表 5%），需乘以 100 轉為百分比
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/v5/market/tickers?category=linear`);
           if (!res.ok) throw new Error("Bybit tickers 失敗: " + res.status);
           const data = await res.json();
           if (data.retCode !== 0) throw new Error("Bybit tickers error: " + data.retMsg);
-          const set = new Set(symbols); // 用 Set 加速查找，避免每筆都掃描整個陣列
+          const set = new Set(symbols);
           const map = {};
           for (const t of data.result.list) {
             if (!set.has(t.symbol)) continue;
@@ -812,7 +747,6 @@
           if (!res.ok) throw new Error(`Bybit K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.retCode !== 0) throw new Error("Bybit K線 error: " + data.retMsg);
-          // Bybit API 回傳順序是最新K棒在前，必須反轉為時間升冪（舊→新）
           return data.result.list.reverse().map(c => ({
             time: parseInt(c[0]) / 1000,
             open: parseFloat(c[1]),
@@ -828,7 +762,6 @@
         name: "Bitget",
         baseUrl: "https://api.bitget.com",
         intervalMap: { "15m": "15min", "1h": "1h", "4h": "4h", "1d": "1day" },
-        // 取得 Bitget 所有 USDT 合約標的代碼清單
         fetchSymbols: async function() {
           const res = await fetch(`${this.baseUrl}/api/v2/mix/market/contracts?productType=USDT-FUTURES`);
           if (!res.ok) throw new Error("Bitget contracts 失敗: " + res.status);
@@ -838,13 +771,12 @@
             .map(s => s.symbol)
             .sort();
         },
-        // Bitget 的 change24h 為小數（如 0.05 代表 5%），需乘以 100 轉為百分比
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/api/v2/mix/market/tickers?productType=USDT-FUTURES`);
           if (!res.ok) throw new Error("Bitget tickers 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget tickers error: " + data.msg);
-          const set = new Set(symbols); // 用 Set 加速查找，避免每筆都掃描整個陣列
+          const set = new Set(symbols);
           const map = {};
           for (const t of data.data) {
             if (!set.has(t.symbol)) continue;
@@ -860,7 +792,6 @@
           if (!res.ok) throw new Error(`Bitget K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget K線 error: " + data.msg);
-          // Bitget API 回傳順序是最新K棒在前，必須反轉為時間升冪（舊→新）
           return data.data.reverse().map(c => ({
             time: parseInt(c[0]) / 1000,
             open: parseFloat(c[1]),
@@ -876,7 +807,6 @@
         name: "BingX",
         baseUrl: "https://open-api.bingx.com",
         intervalMap: { "15m": "15m", "1h": "1h", "4h": "4h", "1d": "1d" },
-        // 取得 BingX 所有 USDT 計價的永續合約代碼清單
         fetchSymbols: async function() {
           const res = await fetch(`${this.baseUrl}/openApi/swap/v2/quote/contracts`);
           if (!res.ok) throw new Error("BingX contracts 失敗: " + res.status);
@@ -892,7 +822,7 @@
           if (!res.ok) throw new Error("BingX ticker 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== 0) throw new Error("BingX ticker error: " + data.msg);
-          const set = new Set(symbols); // 用 Set 加速查找，避免每筆都掃描整個陣列
+          const set = new Set(symbols);
           const map = {};
           for (const t of data.data) {
             if (!set.has(t.symbol)) continue;
@@ -908,7 +838,6 @@
           if (!res.ok) throw new Error(`BingX K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.code !== 0) throw new Error("BingX K線 error: " + data.msg);
-          // BingX K線每筆是物件格式（有具名欄位），與其他交易所的陣列格式不同
           return data.data.map(c => ({
             time: parseInt(c.time) / 1000,
             open: parseFloat(c.open),
@@ -921,20 +850,17 @@
       },
     };
 
-    // ============================================================
-    // 狀態變數
-    // ============================================================
-    let rawSymbols = [];   // 從交易所取回的完整標的清單（原始）
-    let allSymbols = [];   // 目前模式下實際要顯示的標的清單（篩選後）
-    let tickerMap = {};    // symbol → { pct } 的 24h 漲跌幅對照表，用於顯示與排序
+    let rawSymbols = [];
+    let allSymbols = [];
+    let tickerMap = {};
 
-    let currentPage = 0;              // 目前顯示的頁碼（0-based）
-    let currentInterval = "15m";      // 目前選擇的K線時框
-    let currentMode = "diverge";         // 目前模式：scan（全部）/ filter（突破）/ diverge（發散）
-    let currentExchange = "binance";   // 目前選擇的交易所
-    let isLoading = false;             // 防止重複點擊「開始」的鎖
-    let currentLoadToken = 0;          // 頁面切換時的版本號，用來取消過期的載入任務
-    let sortMode = "pct_desc";         // 排序方式：symbol（字母）/ pct_desc（24h漲跌幅高到低）
+    let currentPage = 0;
+    let currentInterval = "15m";
+    let currentMode = "diverge";
+    let currentExchange = "binance";
+    let isLoading = false;
+    let currentLoadToken = 0;
+    let sortMode = "pct_desc";
 
     const statusEl = document.getElementById("status");
     const chartsEl = document.getElementById("charts");
@@ -949,121 +875,77 @@
     const modeSelect = document.getElementById("mode");
     const exchangeSelect = document.getElementById("exchange");
 
-    // K 線快取（換交易所或時框要清空）
     const klinesCache = new Map();
     let observer = null;
 
-    // ============================================================
-    // K 線快取取得
-    // ============================================================
-    // 統一的 K 線取得入口（含快取機制）
-    // 同一個 交易所+標的+時框 的資料只打一次 API，之後直接從快取回傳
     async function fetchKlines(symbol, interval, limit = KLINE_LIMIT) {
-      const key = `${currentExchange}_${symbol}_${interval}`; // 快取鍵值包含交易所，避免切換後讀到舊資料
-      if (klinesCache.has(key)) return klinesCache.get(key);  // 快取命中，直接回傳
+      const key = `${currentExchange}_${symbol}_${interval}`;
+      if (klinesCache.has(key)) return klinesCache.get(key);
       const cfg = EXCHANGE_CONFIG[currentExchange];
       const data = await cfg.fetchKlines(symbol, interval, limit);
       klinesCache.set(key, data);
       return data;
     }
 
-    // ============================================================
-    // 均線計算
-    // ============================================================
-    // 計算簡單移動平均線（SMA）
-    // 使用滑動加總（累加再減去最舊一根）的方式，避免每次都重新加總，效率為 O(n)
-    // 回傳格式：[{ time, value }, ...]，從第 (period-1) 根K棒開始才有值
     function calcMA(data, period) {
       const result = [];
       let sum = 0;
       for (let i = 0; i < data.length; i++) {
-        sum += data[i].close;                              // 加入當根收盤價
-        if (i >= period) sum -= data[i - period].close;   // 移除超出視窗的最舊收盤價
-        if (i >= period - 1) result.push({ time: data[i].time, value: sum / period }); // 達到視窗大小才開始輸出
+        sum += data[i].close;
+        if (i >= period) sum -= data[i - period].close;
+        if (i >= period - 1) result.push({ time: data[i].time, value: sum / period });
       }
       return result;
     }
 
-    // ============================================================
-    // 檢查最新一根K棒的 30MA > 45MA > 60MA
-    // ============================================================
-    // 檢查最新一根K棒是否滿足均線多頭排列：MA30 > MA45 > MA60
-    // 此函式目前保留備用，供未來功能擴充使用
     function checkMAAlignment(data) {
-      // 至少需要 60 根才能算出 MA60
       if (!data || data.length < 60) return false;
-
       const ma30Last = calcMA(data, 30);
       const ma45Last = calcMA(data, 45);
       const ma60Last = calcMA(data, 60);
-
       if (!ma30Last.length || !ma45Last.length || !ma60Last.length) return false;
-
       const v30 = ma30Last[ma30Last.length - 1].value;
       const v45 = ma45Last[ma45Last.length - 1].value;
       const v60 = ma60Last[ma60Last.length - 1].value;
-
       return v30 > v45 && v45 > v60;
     }
 
-    // ============================================================
-    // 突破篩選邏輯
-    // ============================================================
-
-    // 突破判斷：在最近 120 根K棒中找出最高的 high 值
-    // 若該最高值出現在最近 10 根以內，代表「近期剛創 120 根內的新高」→ 符合突破條件
     function checkBreakoutLast10Of120(data) {
-      if (!data || data.length < 120) return false;  // 資料不足則直接排除
-
+      if (!data || data.length < 120) return false;
       const len = data.length;
-      const recent120 = data.slice(len - 120); // 取最近 120 根
-      const recent10  = recent120.slice(-10);  // 從 120 根裡取最末尾的 10 根
-
-      // 掃描 120 根內的最高價
+      const recent120 = data.slice(len - 120);
+      const recent10  = recent120.slice(-10);
       let h120 = -Infinity;
       for (const bar of recent120) {
         if (bar.high > h120) h120 = bar.high;
       }
-
-      // 掃描近 10 根內的最高價
       let h10 = -Infinity;
       for (const bar of recent10) {
         if (bar.high > h10) h10 = bar.high;
       }
-
-      // 兩者相等 → 120根最高價就發生在近10根內 → 突破成立
       return h10 === h120;
     }
 
-    // 找出突破發生在 recent 10 根內的「哪一根」K棒的索引（對應 data 陣列）
-    // 目前保留備用，供未來標示突破K棒功能使用
     function findBreakoutIndex(data) {
       if (!data || data.length < 120) return null;
-
       const len = data.length;
       const recent120 = data.slice(len - 120);
       const recent10  = recent120.slice(-10);
-
       let h120 = -Infinity;
       for (const bar of recent120) {
         if (bar.high > h120) h120 = bar.high;
       }
-
-      // 從近10根中找出 high 等於 h120 的第一根，回傳其在 data 中的絕對索引
       for (let i = 0; i < recent10.length; i++) {
         if (recent10[i].high === h120) {
-          return (len - 10) + i;  // 轉換為 data 陣列的絕對索引
+          return (len - 10) + i;
         }
       }
-
-      return null; // 找不到（理論上不會發生，有做 checkBreakout 才會呼叫此函式）
+      return null;
     }
 
-    // 針對所有 symbol 做突破篩選
     async function filterBreakoutSymbols(symbols, interval) {
       const result = [];
       let checked = 0;
-
       for (const sym of symbols) {
         try {
           const data = await fetchKlines(sym, interval, KLINE_LIMIT);
@@ -1073,110 +955,80 @@
         } catch (e) {
           console.error("篩選 K 線失敗：", sym, e);
         }
-
         checked++;
         statusEl.textContent = `篩選中（${checked} / ${symbols.length}）`;
         await new Promise(r => setTimeout(r));
       }
-
       return result;
     }
 
-    // ============================================================
-    // 發散模式篩選邏輯
-    // 三關條件（近5根K棒，索引 -1 最新、-6 最舊的前一根）：
-    //   第一關：每根K棒的 MA30、MA45、MA60 都比前一根大（持續遞增）
-    //   第二關：每根K棒的 MA30增長率 > MA45增長率 > MA60增長率（短均加速>長均加速）
-    //   第三關：每根K棒的 (MA30-MA45)/MA45 > (MA45-MA60)/MA60（短中間距 > 中長間距）
-    // 排序：(col0+col1+col2)/3 的五根平均值 由高到低
-    // 回傳陣列已排序：[{ symbol, score }, ...]
-    // ============================================================
-    // 發散模式核心評分函式
-    // 對單一標的計算「均線發散強度分數」，三關全過才回傳分數，任一關不過回傳 null
     function calcDivergeScore(data) {
-      // 至少需要 60+6 根：MA60 需要60根，再加5根比較對象需要各自的前一根，共需66根
       if (!data || data.length < 66) return null;
-
       const ma30 = calcMA(data, 30);
       const ma45 = calcMA(data, 45);
       const ma60 = calcMA(data, 60);
-
-      // 三條均線長度不同（MA30最長、MA60最短），以各自末尾對齊最新K棒
       const n60 = ma60.length;
       const n45 = ma45.length;
       const n30 = ma30.length;
-      if (n60 < 6 || n45 < 6 || n30 < 6) return null; // 資料不足以比較5根
-
-      // 逐一檢查近5根（i=0最新根，i=4第5根），收集通過三關的增長率
-      const growthMatrix = []; // 儲存每根的 { col0, col1, col2 }
-
+      if (n60 < 6 || n45 < 6 || n30 < 6) return null;
+      const growthMatrix = [];
       for (let i = 0; i < 5; i++) {
-        // 當根：末尾往前 i 根
         const cur30 = ma30[n30 - 1 - i].value;
         const cur45 = ma45[n45 - 1 - i].value;
         const cur60 = ma60[n60 - 1 - i].value;
-        // 前一根
         const prv30 = ma30[n30 - 2 - i].value;
         const prv45 = ma45[n45 - 2 - i].value;
         const prv60 = ma60[n60 - 2 - i].value;
-
-        // 第一關：三條MA都必須遞增
         if (cur30 <= prv30 || cur45 <= prv45 || cur60 <= prv60) return null;
-
-        // col0~col2：增長百分比
         const col0 = (cur30 - prv30) / prv30 * 100;
         const col1 = (cur45 - prv45) / prv45 * 100;
         const col2 = (cur60 - prv60) / prv60 * 100;
-
-        // 第二關：MA30增長率 > MA45增長率 > MA60增長率
         if (!(col0 > col1 && col1 > col2)) return null;
-
-        // col3/col4：間距
         const col3 = (cur30 - cur45) / cur45 * 100;
         const col4 = (cur45 - cur60) / cur60 * 100;
-
-        // 第三關：短中間距 > 中長間距
         if (!(col3 > col4)) return null;
-
         growthMatrix.push({ col0, col1, col2 });
       }
-
-      // 排序分數：五根的 (col0+col1+col2)/3 平均
       const score = growthMatrix.reduce((sum, row) =>
         sum + (row.col0 + row.col1 + row.col2) / 3, 0) / 5;
-
       return score;
     }
 
-    // 遍歷所有標的進行發散條件篩選，通過者記錄分數，最後依分數由高到低排序
-    // 回傳已排序的標的代碼陣列（強勢優先）
     async function filterDivergeSymbols(symbols, interval) {
-      const scored = []; // 儲存 { symbol, score } 物件，用於後續排序
+      const scored = [];
       let checked = 0;
       for (const sym of symbols) {
         try {
           const data = await fetchKlines(sym, interval, KLINE_LIMIT);
           const score = calcDivergeScore(data);
           if (score !== null && score > 0) {
-            scored.push({ symbol: sym, score }); // 分數大於 0 才納入
+            scored.push({ symbol: sym, score });
           }
         } catch (e) {
-          console.error("發散篩選失敗：", sym, e); // 單一標的失敗不中斷整體流程
+          console.error("發散篩選失敗：", sym, e);
         }
         checked++;
-        statusEl.textContent = `篩選（發散）中（${checked} / ${symbols.length}）`; // 即時更新進度
-        await new Promise(r => setTimeout(r)); // 讓瀏覽器有機會更新畫面
+        statusEl.textContent = `篩選（發散）中（${checked} / ${symbols.length}）`;
+        await new Promise(r => setTimeout(r));
       }
-      // 依均線增長率平均值（強勢分數）由高到低排序
       scored.sort((a, b) => b.score - a.score);
-      return scored.map(item => item.symbol); // 只回傳標的代碼，排序已保留
+      return scored.map(item => item.symbol);
     }
 
     // ============================================================
-    // 建立卡片（DOM 結構，不含圖表）
-    // 每個卡片只建立 HTML 骨架，實際的K線圖由 Lazy Load 觸發時才繪製
-    // 這樣可以讓頁面快速呈現，不用等所有K線都畫完才顯示
+    // 爆量判斷：對每根K棒標記是否為爆量棒
+    // 規則：當前K棒成交量 >= 前一根K棒成交量 × VOLUME_SURGE_RATIO（預設 2.5x）
+    // 第一根K棒（index=0）無前一根可比較，一律不標記
     // ============================================================
+    function markVolumeSurge(data) {
+      return data.map((bar, i) => {
+        if (i === 0) return { ...bar, isSurge: false };
+        const prevVol = data[i - 1].volume;
+        const isSurge = prevVol > 0 && bar.volume >= prevVol * VOLUME_SURGE_RATIO;
+        return { ...bar, isSurge };
+      });
+    }
+
     function buildCard(symbol, interval, container, changePct) {
       const wrap = document.createElement("div");
       wrap.className = "chart-wrapper";
@@ -1184,7 +1036,6 @@
       const title = document.createElement("div");
       title.className = "chart-title";
 
-      // Left: symbol + pct badge
       const left = document.createElement("div");
       left.className = "chart-title-left";
 
@@ -1205,7 +1056,6 @@
         left.appendChild(pctSpan);
       }
 
-      // Right: interval label
       const right = document.createElement("span");
       right.className = "chart-sub";
       right.textContent = interval;
@@ -1220,37 +1070,32 @@
       wrap.appendChild(chartDiv);
       container.appendChild(wrap);
 
-      // 將圖表所需資訊附掛在 DOM 節點上，Lazy Load 觸發時直接讀取
       wrap._symbol = symbol;
       wrap._interval = interval;
       wrap._pct = changePct;
-      wrap._chartDiv = chartDiv;       // 圖表實際繪製的容器 div
-      wrap._chartInstance = null;      // 尚未建立圖表實例
-      wrap._loading = false;           // 防止重複觸發繪製
+      wrap._chartDiv = chartDiv;
+      wrap._chartInstance = null;
+      wrap._loading = false;
 
-      if (observer) observer.observe(wrap); // 開始監聽這張卡片的可見狀態
+      if (observer) observer.observe(wrap);
       return wrap;
     }
 
-    // ============================================================
-    // 掛載圖表（Lazy Load 觸發時呼叫）
-    // 卡片進入瀏覽器可視範圍時才實際建立 K 線圖，節省資源
-    // 已建立（_chartInstance 存在）或正在建立中（_loading）則跳過，防止重複繪製
-    // ============================================================
     async function mountChart(card) {
-      if (card._chartInstance || card._loading) return; // 防止重複建立
-      card._loading = true; // 標記為「建立中」
+      if (card._chartInstance || card._loading) return;
+      card._loading = true;
 
       try {
         const symbol = card._symbol;
         const interval = card._interval;
-        const data = await fetchKlines(symbol, interval, KLINE_LIMIT);
+        const rawData = await fetchKlines(symbol, interval, KLINE_LIMIT);
 
-        // 若卡片已從 DOM 移除（換頁等情況），不繼續建立圖表
         if (!card.isConnected) return;
 
+        // 標記爆量棒（成交量 >= 前一根 × 2.5x）
+        const data = markVolumeSurge(rawData);
+
         const chartDiv = card._chartDiv;
-        // 取得容器寬度，依序嘗試自身寬 → 父元素寬 → 預設 320px
         const width = chartDiv.clientWidth || chartDiv.parentElement.clientWidth || 320;
         const height = getChartHeight();
         chartDiv.style.height = height + "px";
@@ -1269,7 +1114,6 @@
           timeScale: {
             timeVisible: true,
             secondsVisible: false,
-            // 時間軸刻度格式：只顯示時:分（台灣本地時間）
             tickMarkFormatter: (time) => {
               const date = new Date(time * 1000);
               const h = date.getHours().toString().padStart(2, "0");
@@ -1280,7 +1124,6 @@
           rightPriceScale: { visible: true },
         });
 
-        // 滑鼠懸停在K棒上時，工具提示顯示完整的「年-月-日 時:分」格式
         chart.applyOptions({
           localization: {
             timeFormatter: (time) => {
@@ -1295,9 +1138,6 @@
           }
         });
 
-        // K棒顏色設定：綠漲（收盤≥開盤）紅跌（收盤<開盤）
-        // upColor/borderUpColor/wickUpColor：陽線（收≥開）的實體、邊框、影線
-        // downColor/borderDownColor/wickDownColor：陰線（收<開）的實體、邊框、影線
         const candleSeries = chart.addCandlestickSeries({
           upColor: "#00e5a0",
           borderUpColor: "#00e5a0",
@@ -1306,60 +1146,66 @@
           borderDownColor: "#ff4560",
           wickDownColor: "#ff4560",
         });
-        // 逐筆設定每根K棒的顏色（確保顏色正確覆蓋，不受圖表庫預設值影響）
-        const coloredData = data.map(bar => ({
-          ...bar,
-          color:       bar.close >= bar.open ? "#00e5a0" : "#ff4560",
-          borderColor: bar.close >= bar.open ? "#00e5a0" : "#ff4560",
-          wickColor:   bar.close >= bar.open ? "#00e5a0" : "#ff4560",
-        }));
+
+        // ── K棒顏色邏輯 ─────────────────────────────────────────────
+        // 爆量棒（成交量 >= 前一根 × 2.5x）：實體（color/borderColor）改為黃色 #FFD700
+        //   影線（wickColor）維持漲跌原色，讓K棒結構依然清晰可辨
+        // 一般棒：漲綠 #00e5a0 / 跌紅 #ff4560
+        // ─────────────────────────────────────────────────────────────
+        const coloredData = data.map(bar => {
+          const isUp = bar.close >= bar.open;
+          const baseColor = isUp ? "#00e5a0" : "#ff4560";
+          const bodyColor = bar.isSurge ? "#FFD700" : baseColor; // 爆量實體 → 黃色
+          return {
+            time:        bar.time,
+            open:        bar.open,
+            high:        bar.high,
+            low:         bar.low,
+            close:       bar.close,
+            color:       bodyColor,   // K棒實體填色
+            borderColor: bodyColor,   // K棒實體邊框
+            wickColor:   baseColor,   // 影線仍用漲跌原色
+          };
+        });
         candleSeries.setData(coloredData);
 
-        // 突破箭頭標記（只在篩選（突破）模式顯示）
-        // 找出近10根內創近120根新高的那根K棒，在其上方顯示黃色向下箭頭並標示「最高點」
         if (currentMode === "filter") {
           const breakoutIndex = findBreakoutIndex(data);
-
           if (breakoutIndex !== null) {
             const bar = data[breakoutIndex];
-
-            const marker = {
+            candleSeries.setMarkers([{
               time: bar.time,
               position: "aboveBar",
               color: "#00c8e0",
               shape: "arrowDown",
               text: "最高點",
-            };
-
-            candleSeries.setMarkers([marker]);
+            }]);
           }
         }
 
-        // 成交量長條圖：顯示在主圖下方 20% 的區域，顏色與K棒一致（漲綠跌紅）
         const volumeSeries = chart.addHistogramSeries({
           priceScaleId: "volume",
           priceFormat: { type: "volume" },
           priceLineVisible: false,
           lastValueVisible: false,
         });
+
+        // 成交量顏色：漲綠跌紅（與K棒一致）
         volumeSeries.setData(data.map(bar => ({
           time: bar.time,
           value: bar.volume,
           color: bar.close >= bar.open ? "rgba(0, 229, 160, 0.35)" : "rgba(255, 69, 96, 0.35)",
         })));
-        // 成交量佔主圖下方 20%（top: 0.8 = 從 80% 高度開始），不顯示對齊標籤
+
         chart.priceScale("volume").applyOptions({
           scaleMargins: { top: 0.8, bottom: 0 },
           alignLabels: false,
         });
 
-        // 均線
         const ma30Data = calcMA(data, 30);
         const ma45Data = calcMA(data, 45);
         const ma60Data = calcMA(data, 60);
 
-        // 三條均線：MA30（天藍）/ MA45（琥珀）/ MA60（紫），共用主圖右側價格軸
-        // priceLineVisible: false → 不顯示最新值的橫線；lastValueVisible: false → 不顯示末端數值標籤
         const ma30Series = chart.addLineSeries({ color: "#38bdf8", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
         const ma45Series = chart.addLineSeries({ color: "#fbbf24", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
         const ma60Series = chart.addLineSeries({ color: "#a78bfa", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
@@ -1368,13 +1214,12 @@
         if (ma45Data.length) ma45Series.setData(ma45Data);
         if (ma60Data.length) ma60Series.setData(ma60Data);
 
-        // 設定初始可視範圍：預設顯示最近 250 根K棒，右側留 15 根的空白緩衝
         const totalBars = data.length;
         if (totalBars > 0) {
-          const visibleBars = Math.min(250, totalBars);          // 最多顯示 250 根
-          const from = Math.max(0, totalBars - visibleBars - 15); // 起始索引
-          const to = totalBars + 15;                             // 右側超出最後一根 15 格
-          chart.timeScale().applyOptions({ rightOffset: 15 });   // 右側預留空白
+          const visibleBars = Math.min(250, totalBars);
+          const from = Math.max(0, totalBars - visibleBars - 15);
+          const to = totalBars + 15;
+          chart.timeScale().applyOptions({ rightOffset: 15 });
           chart.timeScale().setVisibleLogicalRange({ from, to });
         }
 
@@ -1386,35 +1231,30 @@
       }
     }
 
-    // 卸載圖表（卡片滑出可視範圍時呼叫）
-    // 主動銷毀圖表實例並清空 DOM，釋放記憶體，避免大量K線同時存在導致瀏覽器卡頓
     function unmountChart(card) {
       if (card._chartInstance) {
-        card._chartInstance.remove(); // 呼叫 LightweightCharts 的銷毀方法
+        card._chartInstance.remove();
         card._chartInstance = null;
       }
-      if (card._chartDiv) card._chartDiv.innerHTML = ""; // 清空圖表容器的 DOM 內容
+      if (card._chartDiv) card._chartDiv.innerHTML = "";
     }
 
-    // 依目前的 sortMode 對 allSymbols 進行排序（直接修改原陣列）
-    // symbol：字母升冪排列；pct_desc：24h 漲跌幅由高到低（無漲跌幅資料的排到最後）
     function applySorting() {
       if (!allSymbols || allSymbols.length === 0) return;
       if (sortMode === "symbol") {
-        allSymbols.sort(); // 字母升冪（原生字串排序）
+        allSymbols.sort();
       } else if (sortMode === "pct_desc") {
         allSymbols.sort((a, b) => {
-          const pa = tickerMap[a]?.pct ?? -Infinity; // 沒有漲跌幅資料的排到最後
+          const pa = tickerMap[a]?.pct ?? -Infinity;
           const pb = tickerMap[b]?.pct ?? -Infinity;
-          return pb - pa; // 降冪
+          return pb - pa;
         });
       }
     }
 
-    // 同步更新頁面頂部與底部的分頁按鈕狀態及頁碼文字
     function updatePaginationUI() {
       const total = allSymbols.length;
-      const totalPages = total === 0 ? 0 : Math.ceil(total / PAGE_SIZE); // 總頁數
+      const totalPages = total === 0 ? 0 : Math.ceil(total / PAGE_SIZE);
       const isMobile = window.innerWidth < 640;
 
       if (totalPages === 0) {
@@ -1443,16 +1283,13 @@
       bottomNextBtn.disabled = currentPage >= totalPages - 1;
     }
 
-    // 載入指定頁碼的卡片清單
-    // 每次呼叫會先清空舊頁面的圖表與 DOM，再建立新頁面的卡片骨架
-    // 使用 currentLoadToken 機制：若切換頁面時上一頁尚未載完，自動中止舊任務
     async function loadPage(pageIndex) {
       const totalPages = Math.ceil(allSymbols.length / PAGE_SIZE);
-      if (pageIndex < 0 || pageIndex >= totalPages) return; // 頁碼越界則不處理
+      if (pageIndex < 0 || pageIndex >= totalPages) return;
 
-      window.scrollTo({ top: 0, behavior: "smooth" }); // 換頁時回到頂部
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
-      const token = ++currentLoadToken; // 產生新版本號，使舊任務的檢查失效
+      const token = ++currentLoadToken;
       currentPage = pageIndex;
       updatePaginationUI();
 
@@ -1467,27 +1304,21 @@
       const targets = allSymbols.slice(start, end);
 
       for (const sym of targets) {
-        if (token !== currentLoadToken) return; // 若已切換到更新頁面，停止繼續建立卡片
-        const pct = tickerMap[sym]?.pct ?? null;  // 取得 24h 漲跌幅（可能為 null）
+        if (token !== currentLoadToken) return;
+        const pct = tickerMap[sym]?.pct ?? null;
         buildCard(sym, currentInterval, chartsEl, pct);
       }
     }
 
-    // ============================================================
-    // 主流程
-    // ============================================================
-    // ── 主流程：點擊「開始」後執行 ────────────────────────────────────
-    // 流程：取得合約清單 → 取得漲跌幅 → 依模式篩選 → 排序 → 載入第一頁
     async function scan() {
-      if (isLoading) return; // 防止重複執行
+      if (isLoading) return;
       isLoading = true;
-      currentInterval = intervalSelect.value;  // 讀取目前選擇的時框
-      currentMode = modeSelect.value;          // 讀取目前選擇的模式
-      currentExchange = exchangeSelect.value;  // 讀取目前選擇的交易所
+      currentInterval = intervalSelect.value;
+      currentMode = modeSelect.value;
+      currentExchange = exchangeSelect.value;
       statusEl.textContent = "取得合約清單中…";
-      currentLoadToken++; // 讓舊的載入任務自動失效
+      currentLoadToken++;
 
-      // 每次執行都清空快取與標的清單，確保拿到最新資料
       rawSymbols = [];
       klinesCache.clear();
 
@@ -1517,7 +1348,6 @@
           statusEl.textContent = `依 ${currentInterval} 篩選突破中…`;
           const breakoutSymbols = await filterBreakoutSymbols(rawSymbols, currentInterval);
           allSymbols = breakoutSymbols;
-
           if (allSymbols.length === 0) {
             statusEl.textContent = `沒有符合「近 10 根內創近 120 根新高」條件的標的（${currentInterval}）。`;
             isLoading = false;
@@ -1529,7 +1359,6 @@
           statusEl.textContent = `依 ${currentInterval} 篩選發散中…`;
           const divergeSymbols = await filterDivergeSymbols(rawSymbols, currentInterval);
           allSymbols = divergeSymbols;
-
           if (allSymbols.length === 0) {
             statusEl.textContent = `沒有符合「近5根MA持續遞增＋短均加速>長均加速＋間距擴大」條件的標的（${currentInterval}）。`;
             isLoading = false;
@@ -1564,40 +1393,28 @@
       }
     }
 
-    // ============================================================
-    // 事件綁定
-    // ============================================================
-    document.getElementById("scan-btn").addEventListener("click", scan); // 開始按鈕
-
-    // 頁面頂部與底部的上一頁 / 下一頁按鈕
+    document.getElementById("scan-btn").addEventListener("click", scan);
     prevBtn.addEventListener("click", async () => { await loadPage(currentPage - 1); });
     nextBtn.addEventListener("click", async () => { await loadPage(currentPage + 1); });
     bottomPrevBtn.addEventListener("click", async () => { await loadPage(currentPage - 1); });
     bottomNextBtn.addEventListener("click", async () => { await loadPage(currentPage + 1); });
 
-    // 排序方式變更時：重新排序並重新載入第一頁
     sortSelect.addEventListener("change", async () => {
       sortMode = sortSelect.value;
-      applySorting();         // 對 allSymbols 重新排序
-      updatePaginationUI();   // 更新頁碼顯示
-      currentLoadToken++;     // 使舊的載入任務失效
-      await loadPage(0);      // 回到第一頁
+      applySorting();
+      updatePaginationUI();
+      currentLoadToken++;
+      await loadPage(0);
     });
 
-    // ============================================================
-    // Lazy Load IntersectionObserver
-    // ============================================================
-    // 使用 IntersectionObserver 實現 Lazy Load（懶加載）
-    // 當卡片有 10% 以上進入可視範圍（threshold: 0.1）→ 建立圖表
-    // 當卡片完全離開可視範圍 → 卸載圖表，釋放記憶體
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           const card = entry.target;
           if (entry.isIntersecting) {
-            mountChart(card);   // 進入可視範圍 → 建立並繪製 K 線圖
+            mountChart(card);
           } else {
-            unmountChart(card); // 離開可視範圍 → 銷毀圖表實例、清空 DOM
+            unmountChart(card);
           }
         }
       }, { root: null, threshold: 0.1 });
@@ -1605,11 +1422,6 @@
       console.warn("此瀏覽器不支援 IntersectionObserver，Lazy Load 失效。");
     }
 
-    // ============================================================
-    // Resize
-    // ============================================================
-    // 視窗尺寸改變時，重新計算並套用每個已建立圖表的寬度與高度
-    // LightweightCharts 不會自動 RWD，需手動觸發 applyOptions 更新
     let resizeTimer;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
@@ -1622,7 +1434,6 @@
             card._chartDiv.style.height = newHeight + "px";
           }
         });
-        // Re-render pagination text format for screen size change
         updatePaginationUI();
       }, 120);
     });
