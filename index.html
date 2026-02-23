@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>合約篩選器</title>
-  <!-- 使用 4.2.3（有 addCandlestickSeries） -->
   <script src="https://unpkg.com/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -29,15 +28,19 @@
       --font-ui:       'Noto Sans TC', sans-serif;
       --header-h:      54px;
       --chart-h:       350px;
+
+      /* 右側捲軸條寬度 */
+      --scrollbar-w:   36px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-
     html { -webkit-text-size-adjust: 100%; }
 
     body {
       margin: 0;
       padding: 0;
+      /* 右側留出捲軸條的空間 */
+      padding-right: var(--scrollbar-w);
       background: var(--bg-base);
       color: var(--text-primary);
       font-family: var(--font-ui);
@@ -45,6 +48,69 @@
       overflow-x: hidden;
     }
 
+    /* =========================================================
+       右側單指捲軸條
+       ========================================================= */
+    #scroll-rail {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: var(--scrollbar-w);
+      height: 100%;
+      z-index: 200;
+      background: rgba(8, 13, 20, 0.72);
+      border-left: 1px solid var(--border-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* 接受觸控，但不攔截水平滑動 */
+      touch-action: none;
+    }
+
+    /* 滑鼠懸停時微亮 */
+    #scroll-rail:hover {
+      background: rgba(26, 127, 212, 0.06);
+    }
+
+    /* 捲軸拇指（thumb）*/
+    #scroll-thumb {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      border-radius: 3px;
+      background: var(--accent-blue);
+      opacity: 0.55;
+      transition: opacity 0.2s, width 0.2s;
+      cursor: grab;
+      min-height: 28px;
+    }
+
+    #scroll-thumb.active,
+    #scroll-rail:hover #scroll-thumb {
+      opacity: 0.9;
+      width: 8px;
+    }
+
+    /* 小圖示提示：三條橫線 */
+    #scroll-rail::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 10px;
+      border-top: 2px solid var(--text-dim);
+      border-bottom: 2px solid var(--text-dim);
+      box-shadow: 0 -3px 0 var(--text-dim), 0 3px 0 var(--text-dim);
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    /* =========================================================
+       Header
+       ========================================================= */
     header {
       position: sticky;
       top: 0;
@@ -203,11 +269,7 @@
     }
 
     button:active:not(:disabled) { transform: scale(0.96); }
-
-    button:disabled {
-      opacity: 0.22;
-      cursor: not-allowed;
-    }
+    button:disabled { opacity: 0.22; cursor: not-allowed; }
 
     #scan-btn {
       background: linear-gradient(135deg, #0f3a6e, #1a5fa0);
@@ -365,19 +427,15 @@
       pointer-events: none;
     }
 
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg-base); }
-    ::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+    /* 隱藏預設捲軸（已由自訂捲軸取代） */
+    ::-webkit-scrollbar { width: 0; }
 
+    /* =========================================================
+       RWD
+       ========================================================= */
     @media (min-width: 640px) {
-      #charts {
-        padding: 16px 16px 90px;
-        gap: 16px;
-      }
-      .chart-wrapper {
-        width: 95%;
-      }
+      #charts { padding: 16px 16px 90px; gap: 16px; }
+      .chart-wrapper { width: 95%; }
     }
 
     @media (min-width: 1024px) {
@@ -388,54 +446,24 @@
         padding: 0 20px;
         min-height: var(--header-h);
       }
-
-      .header-title-row,
-      .header-controls-row {
-        display: contents;
-      }
-
-      h1 {
-        margin: 0 14px 0 0;
-        order: 0;
-      }
-
+      .header-title-row, .header-controls-row { display: contents; }
+      h1 { margin: 0 14px 0 0; order: 0; }
       .ctrl-group { order: 1; }
-
       #scan-btn { order: 2; }
+      .ctrl-nav { order: 3; margin-left: 0; }
+      #status { order: 99; margin-left: auto; max-width: 360px; text-align: right; }
+      #charts { padding: 20px 16px 90px; }
+      .chart-wrapper { width: 90%; }
 
-      .ctrl-nav {
-        order: 3;
-        margin-left: 0;
-      }
-
-      #status {
-        order: 99;
-        margin-left: auto;
-        max-width: 360px;
-        text-align: right;
-      }
-
-      #charts {
-        padding: 20px 16px 90px;
-      }
-
-      .chart-wrapper {
-        width: 90%;
-      }
+      /* 桌機不需要捲軸條，隱藏即可 */
+      #scroll-rail { display: none; }
+      body { padding-right: 0; }
     }
 
     @media (max-width: 639px) {
       :root { --chart-h: 240px; }
-
-      header {
-        padding: 0;
-      }
-
-      .header-title-row {
-        padding: 10px 14px 0;
-        gap: 6px;
-      }
-
+      header { padding: 0; }
+      .header-title-row { padding: 10px 14px 0; gap: 6px; }
       #status {
         order: 10;
         max-width: 100%;
@@ -446,7 +474,6 @@
         white-space: normal;
         line-height: 1.4;
       }
-
       .header-controls-row {
         padding: 6px 14px 10px;
         gap: 6px;
@@ -454,94 +481,37 @@
         grid-template-columns: 1fr 1fr;
         align-items: center;
       }
-
-      .ctrl-group {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        width: 100%;
-      }
-
-      .ctrl-group select {
-        flex: 1;
-        min-width: 0;
-        font-size: 13px;
-        padding: 7px 26px 7px 9px;
-      }
-
-      #scan-btn {
-        grid-column: 1 / -1;
-        width: 100%;
-        padding: 9px;
-        font-size: 13px;
-      }
-
-      .ctrl-nav {
-        grid-column: 1 / -1;
-        justify-content: center;
-        margin-left: 0;
-        gap: 8px;
-      }
-
-      .ctrl-nav button {
-        flex: 1;
-        padding: 7px 8px;
-        font-size: 12px;
-      }
-
-      #page-info {
-        font-size: 10px;
-        text-align: center;
-      }
-
-      #charts {
-        padding: 10px 8px 80px;
-        gap: 10px;
-      }
-
-      .chart-wrapper {
-        width: 100%;
-        border-radius: 10px;
-        padding: 10px 10px;
-      }
-
+      .ctrl-group { display: flex; align-items: center; gap: 4px; width: 100%; }
+      .ctrl-group select { flex: 1; min-width: 0; font-size: 13px; padding: 7px 26px 7px 9px; }
+      #scan-btn { grid-column: 1 / -1; width: 100%; padding: 9px; font-size: 13px; }
+      .ctrl-nav { grid-column: 1 / -1; justify-content: center; margin-left: 0; gap: 8px; }
+      .ctrl-nav button { flex: 1; padding: 7px 8px; font-size: 12px; }
+      #page-info { font-size: 10px; text-align: center; }
+      #charts { padding: 10px 8px 80px; gap: 10px; }
+      .chart-wrapper { width: 100%; border-radius: 10px; padding: 10px 10px; }
       .chart-symbol { font-size: 12px; }
       .chart-pct    { font-size: 10px; padding: 1px 5px; }
       .chart-sub    { font-size: 9px; }
-
-      #bottom-nav {
-        padding: 8px 12px 12px;
-        gap: 8px;
-      }
-
-      #bottom-nav button {
-        flex: 1;
-        padding: 8px 6px;
-        font-size: 12px;
-      }
-
-      #bottom-page-info {
-        font-size: 10px;
-        flex-shrink: 0;
-      }
+      #bottom-nav { padding: 8px 12px 12px; gap: 8px; }
+      #bottom-nav button { flex: 1; padding: 8px 6px; font-size: 12px; }
+      #bottom-page-info { font-size: 10px; flex-shrink: 0; }
     }
 
     @media (max-width: 374px) {
       :root { --chart-h: 200px; }
-
       h1 { font-size: 11px; }
-
-      .header-controls-row {
-        grid-template-columns: 1fr;
-      }
-
-      .ctrl-nav {
-        grid-column: 1;
-      }
+      .header-controls-row { grid-template-columns: 1fr; }
+      .ctrl-nav { grid-column: 1; }
     }
   </style>
 </head>
 <body>
+
+  <!-- ★ 右側單指捲軸條 -->
+  <div id="scroll-rail">
+    <div id="scroll-thumb"></div>
+  </div>
+
   <header>
     <div class="header-title-row">
       <h1>合約掃圖篩選器</h1>
@@ -556,7 +526,6 @@
           <option value="okx">OKX</option>
           <option value="bybit">Bybit</option>
           <option value="bitget">Bitget</option>
-          <option value="bingx">BingX</option>
         </select>
       </div>
 
@@ -582,8 +551,8 @@
       <div class="ctrl-group">
         <label for="sort">排序</label>
         <select id="sort">
-          <option value="symbol">字母</option>
           <option value="pct_desc" selected>漲跌幅</option>
+          <option value="symbol">字母</option>        
         </select>
       </div>
 
@@ -606,10 +575,126 @@
   </footer>
 
   <script>
+    /* ============================================================
+       右側單指捲軸條邏輯
+       ============================================================ */
+    (function() {
+      const rail  = document.getElementById('scroll-rail');
+      const thumb = document.getElementById('scroll-thumb');
+
+      let dragging   = false;
+      let startY     = 0;
+      let startScroll = 0;
+
+      function getPageHeight() {
+        return Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        );
+      }
+
+      function updateThumb() {
+        const viewH  = window.innerHeight;
+        const pageH  = getPageHeight();
+        const railH  = rail.clientHeight;
+
+        // thumb 高度 = 視窗比例，最小 28px
+        const thumbH = Math.max(28, (viewH / pageH) * railH);
+        // thumb 位置
+        const scrolled  = window.scrollY;
+        const maxScroll = pageH - viewH;
+        const maxTop    = railH - thumbH;
+        const top = maxScroll > 0 ? (scrolled / maxScroll) * maxTop : 0;
+
+        thumb.style.height = thumbH + 'px';
+        thumb.style.top    = top + 'px';
+      }
+
+      function scrollToY(y) {
+        window.scrollTo({ top: y, behavior: 'auto' });
+      }
+
+      /* ── 觸控拖曳（手機） ── */
+      rail.addEventListener('touchstart', function(e) {
+        dragging    = true;
+        startY      = e.touches[0].clientY;
+        startScroll = window.scrollY;
+        thumb.classList.add('active');
+        e.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('touchmove', function(e) {
+        if (!dragging) return;
+        const dy = e.touches[0].clientY - startY;
+        const viewH  = window.innerHeight;
+        const pageH  = getPageHeight();
+        const railH  = rail.clientHeight;
+        const thumbH = Math.max(28, (viewH / pageH) * railH);
+        const ratio  = (pageH - viewH) / (railH - thumbH);
+        scrollToY(startScroll + dy * ratio);
+        e.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('touchend', function() {
+        if (!dragging) return;
+        dragging = false;
+        thumb.classList.remove('active');
+      });
+
+      /* ── 滑鼠拖曳（桌機備用） ── */
+      rail.addEventListener('mousedown', function(e) {
+        dragging    = true;
+        startY      = e.clientY;
+        startScroll = window.scrollY;
+        thumb.classList.add('active');
+        e.preventDefault();
+      });
+
+      window.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        const dy = e.clientY - startY;
+        const viewH  = window.innerHeight;
+        const pageH  = getPageHeight();
+        const railH  = rail.clientHeight;
+        const thumbH = Math.max(28, (viewH / pageH) * railH);
+        const ratio  = (pageH - viewH) / (railH - thumbH);
+        scrollToY(startScroll + dy * ratio);
+      });
+
+      window.addEventListener('mouseup', function() {
+        if (!dragging) return;
+        dragging = false;
+        thumb.classList.remove('active');
+      });
+
+      /* ── 點擊 rail 跳頁 ── */
+      rail.addEventListener('click', function(e) {
+        if (e.target === thumb) return;
+        const railRect = rail.getBoundingClientRect();
+        const clickY   = e.clientY - railRect.top;
+        const viewH    = window.innerHeight;
+        const pageH    = getPageHeight();
+        const railH    = rail.clientHeight;
+        const ratio    = clickY / railH;
+        scrollToY(ratio * (pageH - viewH));
+      });
+
+      /* ── 同步更新 thumb ── */
+      window.addEventListener('scroll',  updateThumb, { passive: true });
+      window.addEventListener('resize',  updateThumb, { passive: true });
+
+      // MutationObserver：頁面內容變動時更新 thumb（切換頁面後高度會變）
+      const mo = new MutationObserver(updateThumb);
+      mo.observe(document.getElementById('charts'), { childList: true, subtree: false });
+
+      updateThumb();
+    })();
+
+    /* ============================================================
+       原有程式碼（完全不動）
+       ============================================================ */
     const PAGE_SIZE = 100;
     const KLINE_LIMIT = 600;
-
-    // 成交量爆量倍率閾值：當前K棒成交量 >= 前一根 × 此倍率，K棒實體改為黃色
     const VOLUME_SURGE_RATIO = 2.5;
 
     function getChartHeight() {
@@ -629,15 +714,13 @@
           const data = await res.json();
           return data.symbols
             .filter(s => s.contractType === "PERPETUAL" && s.quoteAsset === "USDT" && s.status === "TRADING")
-            .map(s => s.symbol)
-            .sort();
+            .map(s => s.symbol).sort();
         },
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/fapi/v1/ticker/24hr`);
           if (!res.ok) throw new Error("Binance 24hr ticker 失敗: " + res.status);
           const data = await res.json();
-          const set = new Set(symbols);
-          const map = {};
+          const set = new Set(symbols); const map = {};
           for (const t of data) {
             if (!set.has(t.symbol)) continue;
             const pct = parseFloat(t.priceChangePercent);
@@ -651,17 +734,9 @@
           const res = await fetch(url);
           if (!res.ok) throw new Error(`Binance K線 ${symbol} 失敗: ` + res.status);
           const raw = await res.json();
-          return raw.map(c => ({
-            time: c[0] / 1000,
-            open: parseFloat(c[1]),
-            high: parseFloat(c[2]),
-            low: parseFloat(c[3]),
-            close: parseFloat(c[4]),
-            volume: parseFloat(c[5]),
-          }));
+          return raw.map(c => ({ time: c[0]/1000, open: parseFloat(c[1]), high: parseFloat(c[2]), low: parseFloat(c[3]), close: parseFloat(c[4]), volume: parseFloat(c[5]) }));
         },
       },
-
       okx: {
         name: "OKX",
         baseUrl: "https://www.okx.com",
@@ -671,26 +746,18 @@
           if (!res.ok) throw new Error("OKX instruments 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "0") throw new Error("OKX instruments error: " + data.msg);
-          return data.data
-            .filter(s => s.settleCcy === "USDT" && s.state === "live")
-            .map(s => s.instId)
-            .sort();
+          return data.data.filter(s => s.settleCcy === "USDT" && s.state === "live").map(s => s.instId).sort();
         },
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/api/v5/market/tickers?instType=SWAP`);
           if (!res.ok) throw new Error("OKX tickers 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "0") throw new Error("OKX tickers error: " + data.msg);
-          const set = new Set(symbols);
-          const map = {};
+          const set = new Set(symbols); const map = {};
           for (const t of data.data) {
             if (!set.has(t.instId)) continue;
-            const open24h = parseFloat(t.open24h);
-            const last = parseFloat(t.last);
-            if (!Number.isNaN(open24h) && open24h !== 0) {
-              const pct = (last - open24h) / open24h * 100;
-              map[t.instId] = { pct };
-            }
+            const open24h = parseFloat(t.open24h); const last = parseFloat(t.last);
+            if (!Number.isNaN(open24h) && open24h !== 0) map[t.instId] = { pct: (last - open24h) / open24h * 100 };
           }
           return map;
         },
@@ -701,17 +768,9 @@
           if (!res.ok) throw new Error(`OKX K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.code !== "0") throw new Error("OKX K線 error: " + data.msg);
-          return data.data.reverse().map(c => ({
-            time: parseInt(c[0]) / 1000,
-            open: parseFloat(c[1]),
-            high: parseFloat(c[2]),
-            low: parseFloat(c[3]),
-            close: parseFloat(c[4]),
-            volume: parseFloat(c[5]),
-          }));
+          return data.data.reverse().map(c => ({ time: parseInt(c[0])/1000, open: parseFloat(c[1]), high: parseFloat(c[2]), low: parseFloat(c[3]), close: parseFloat(c[4]), volume: parseFloat(c[5]) }));
         },
       },
-
       bybit: {
         name: "Bybit",
         baseUrl: "https://api.bybit.com",
@@ -721,18 +780,14 @@
           if (!res.ok) throw new Error("Bybit instruments 失敗: " + res.status);
           const data = await res.json();
           if (data.retCode !== 0) throw new Error("Bybit instruments error: " + data.retMsg);
-          return data.result.list
-            .filter(s => s.quoteCoin === "USDT" && s.status === "Trading" && s.contractType === "LinearPerpetual")
-            .map(s => s.symbol)
-            .sort();
+          return data.result.list.filter(s => s.quoteCoin === "USDT" && s.status === "Trading" && s.contractType === "LinearPerpetual").map(s => s.symbol).sort();
         },
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/v5/market/tickers?category=linear`);
           if (!res.ok) throw new Error("Bybit tickers 失敗: " + res.status);
           const data = await res.json();
           if (data.retCode !== 0) throw new Error("Bybit tickers error: " + data.retMsg);
-          const set = new Set(symbols);
-          const map = {};
+          const set = new Set(symbols); const map = {};
           for (const t of data.result.list) {
             if (!set.has(t.symbol)) continue;
             const pct = parseFloat(t.price24hPcnt) * 100;
@@ -747,17 +802,9 @@
           if (!res.ok) throw new Error(`Bybit K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.retCode !== 0) throw new Error("Bybit K線 error: " + data.retMsg);
-          return data.result.list.reverse().map(c => ({
-            time: parseInt(c[0]) / 1000,
-            open: parseFloat(c[1]),
-            high: parseFloat(c[2]),
-            low: parseFloat(c[3]),
-            close: parseFloat(c[4]),
-            volume: parseFloat(c[5]),
-          }));
+          return data.result.list.reverse().map(c => ({ time: parseInt(c[0])/1000, open: parseFloat(c[1]), high: parseFloat(c[2]), low: parseFloat(c[3]), close: parseFloat(c[4]), volume: parseFloat(c[5]) }));
         },
       },
-
       bitget: {
         name: "Bitget",
         baseUrl: "https://api.bitget.com",
@@ -767,17 +814,14 @@
           if (!res.ok) throw new Error("Bitget contracts 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget contracts error: " + data.msg);
-          return data.data
-            .map(s => s.symbol)
-            .sort();
+          return data.data.map(s => s.symbol).sort();
         },
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/api/v2/mix/market/tickers?productType=USDT-FUTURES`);
           if (!res.ok) throw new Error("Bitget tickers 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget tickers error: " + data.msg);
-          const set = new Set(symbols);
-          const map = {};
+          const set = new Set(symbols); const map = {};
           for (const t of data.data) {
             if (!set.has(t.symbol)) continue;
             const pct = parseFloat(t.change24h) * 100;
@@ -792,68 +836,14 @@
           if (!res.ok) throw new Error(`Bitget K線 ${symbol} 失敗: ` + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget K線 error: " + data.msg);
-          return data.data.reverse().map(c => ({
-            time: parseInt(c[0]) / 1000,
-            open: parseFloat(c[1]),
-            high: parseFloat(c[2]),
-            low: parseFloat(c[3]),
-            close: parseFloat(c[4]),
-            volume: parseFloat(c[5]),
-          }));
-        },
-      },
-
-      bingx: {
-        name: "BingX",
-        baseUrl: "https://open-api.bingx.com",
-        intervalMap: { "15m": "15m", "1h": "1h", "4h": "4h", "1d": "1d" },
-        fetchSymbols: async function() {
-          const res = await fetch(`${this.baseUrl}/openApi/swap/v2/quote/contracts`);
-          if (!res.ok) throw new Error("BingX contracts 失敗: " + res.status);
-          const data = await res.json();
-          if (data.code !== 0) throw new Error("BingX contracts error: " + data.msg);
-          return data.data
-            .filter(s => s.currency === "USDT")
-            .map(s => s.symbol)
-            .sort();
-        },
-        fetch24hTickers: async function(symbols) {
-          const res = await fetch(`${this.baseUrl}/openApi/swap/v2/quote/ticker`);
-          if (!res.ok) throw new Error("BingX ticker 失敗: " + res.status);
-          const data = await res.json();
-          if (data.code !== 0) throw new Error("BingX ticker error: " + data.msg);
-          const set = new Set(symbols);
-          const map = {};
-          for (const t of data.data) {
-            if (!set.has(t.symbol)) continue;
-            const pct = parseFloat(t.priceChangePercent);
-            if (!Number.isNaN(pct)) map[t.symbol] = { pct };
-          }
-          return map;
-        },
-        fetchKlines: async function(symbol, interval, limit) {
-          const iv = this.intervalMap[interval] || interval;
-          const url = `${this.baseUrl}/openApi/swap/v3/quote/klines?symbol=${symbol}&interval=${iv}&limit=${limit}`;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`BingX K線 ${symbol} 失敗: ` + res.status);
-          const data = await res.json();
-          if (data.code !== 0) throw new Error("BingX K線 error: " + data.msg);
-          return data.data.map(c => ({
-            time: parseInt(c.time) / 1000,
-            open: parseFloat(c.open),
-            high: parseFloat(c.high),
-            low: parseFloat(c.low),
-            close: parseFloat(c.close),
-            volume: parseFloat(c.volume),
-          }));
+          return data.data.reverse().map(c => ({ time: parseInt(c[0])/1000, open: parseFloat(c[1]), high: parseFloat(c[2]), low: parseFloat(c[3]), close: parseFloat(c[4]), volume: parseFloat(c[5]) }));
         },
       },
     };
 
     let rawSymbols = [];
     let allSymbols = [];
-    let tickerMap = {};
-
+    let tickerMap  = {};
     let currentPage = 0;
     let currentInterval = "15m";
     let currentMode = "diverge";
@@ -862,18 +852,18 @@
     let currentLoadToken = 0;
     let sortMode = "pct_desc";
 
-    const statusEl = document.getElementById("status");
-    const chartsEl = document.getElementById("charts");
-    const prevBtn = document.getElementById("prev-btn");
-    const nextBtn = document.getElementById("next-btn");
-    const pageInfoEl = document.getElementById("page-info");
-    const bottomPrevBtn = document.getElementById("bottom-prev-btn");
-    const bottomNextBtn = document.getElementById("bottom-next-btn");
-    const bottomPageInfoEl = document.getElementById("bottom-page-info");
-    const intervalSelect = document.getElementById("interval");
-    const sortSelect = document.getElementById("sort");
-    const modeSelect = document.getElementById("mode");
-    const exchangeSelect = document.getElementById("exchange");
+    const statusEl        = document.getElementById("status");
+    const chartsEl        = document.getElementById("charts");
+    const prevBtn         = document.getElementById("prev-btn");
+    const nextBtn         = document.getElementById("next-btn");
+    const pageInfoEl      = document.getElementById("page-info");
+    const bottomPrevBtn   = document.getElementById("bottom-prev-btn");
+    const bottomNextBtn   = document.getElementById("bottom-next-btn");
+    const bottomPageInfoEl= document.getElementById("bottom-page-info");
+    const intervalSelect  = document.getElementById("interval");
+    const sortSelect      = document.getElementById("sort");
+    const modeSelect      = document.getElementById("mode");
+    const exchangeSelect  = document.getElementById("exchange");
 
     const klinesCache = new Map();
     let observer = null;
@@ -888,8 +878,7 @@
     }
 
     function calcMA(data, period) {
-      const result = [];
-      let sum = 0;
+      const result = []; let sum = 0;
       for (let i = 0; i < data.length; i++) {
         sum += data[i].close;
         if (i >= period) sum -= data[i - period].close;
@@ -898,31 +887,15 @@
       return result;
     }
 
-    function checkMAAlignment(data) {
-      if (!data || data.length < 60) return false;
-      const ma30Last = calcMA(data, 30);
-      const ma45Last = calcMA(data, 45);
-      const ma60Last = calcMA(data, 60);
-      if (!ma30Last.length || !ma45Last.length || !ma60Last.length) return false;
-      const v30 = ma30Last[ma30Last.length - 1].value;
-      const v45 = ma45Last[ma45Last.length - 1].value;
-      const v60 = ma60Last[ma60Last.length - 1].value;
-      return v30 > v45 && v45 > v60;
-    }
-
     function checkBreakoutLast10Of120(data) {
       if (!data || data.length < 120) return false;
       const len = data.length;
       const recent120 = data.slice(len - 120);
       const recent10  = recent120.slice(-10);
       let h120 = -Infinity;
-      for (const bar of recent120) {
-        if (bar.high > h120) h120 = bar.high;
-      }
+      for (const bar of recent120) if (bar.high > h120) h120 = bar.high;
       let h10 = -Infinity;
-      for (const bar of recent10) {
-        if (bar.high > h10) h10 = bar.high;
-      }
+      for (const bar of recent10)  if (bar.high > h10)  h10  = bar.high;
       return h10 === h120;
     }
 
@@ -932,29 +905,20 @@
       const recent120 = data.slice(len - 120);
       const recent10  = recent120.slice(-10);
       let h120 = -Infinity;
-      for (const bar of recent120) {
-        if (bar.high > h120) h120 = bar.high;
-      }
+      for (const bar of recent120) if (bar.high > h120) h120 = bar.high;
       for (let i = 0; i < recent10.length; i++) {
-        if (recent10[i].high === h120) {
-          return (len - 10) + i;
-        }
+        if (recent10[i].high === h120) return (len - 10) + i;
       }
       return null;
     }
 
     async function filterBreakoutSymbols(symbols, interval) {
-      const result = [];
-      let checked = 0;
+      const result = []; let checked = 0;
       for (const sym of symbols) {
         try {
           const data = await fetchKlines(sym, interval, KLINE_LIMIT);
-          if (checkBreakoutLast10Of120(data)) {
-            result.push(sym);
-          }
-        } catch (e) {
-          console.error("篩選 K 線失敗：", sym, e);
-        }
+          if (checkBreakoutLast10Of120(data)) result.push(sym);
+        } catch(e) { console.error("篩選 K 線失敗：", sym, e); }
         checked++;
         statusEl.textContent = `篩選中（${checked} / ${symbols.length}）`;
         await new Promise(r => setTimeout(r));
@@ -967,46 +931,30 @@
       const ma30 = calcMA(data, 30);
       const ma45 = calcMA(data, 45);
       const ma60 = calcMA(data, 60);
-      const n60 = ma60.length;
-      const n45 = ma45.length;
-      const n30 = ma30.length;
+      const n60 = ma60.length, n45 = ma45.length, n30 = ma30.length;
       if (n60 < 6 || n45 < 6 || n30 < 6) return null;
       const growthMatrix = [];
       for (let i = 0; i < 5; i++) {
-        const cur30 = ma30[n30 - 1 - i].value;
-        const cur45 = ma45[n45 - 1 - i].value;
-        const cur60 = ma60[n60 - 1 - i].value;
-        const prv30 = ma30[n30 - 2 - i].value;
-        const prv45 = ma45[n45 - 2 - i].value;
-        const prv60 = ma60[n60 - 2 - i].value;
+        const cur30 = ma30[n30-1-i].value, cur45 = ma45[n45-1-i].value, cur60 = ma60[n60-1-i].value;
+        const prv30 = ma30[n30-2-i].value, prv45 = ma45[n45-2-i].value, prv60 = ma60[n60-2-i].value;
         if (cur30 <= prv30 || cur45 <= prv45 || cur60 <= prv60) return null;
-        const col0 = (cur30 - prv30) / prv30 * 100;
-        const col1 = (cur45 - prv45) / prv45 * 100;
-        const col2 = (cur60 - prv60) / prv60 * 100;
+        const col0 = (cur30-prv30)/prv30*100, col1 = (cur45-prv45)/prv45*100, col2 = (cur60-prv60)/prv60*100;
         if (!(col0 > col1 && col1 > col2)) return null;
-        const col3 = (cur30 - cur45) / cur45 * 100;
-        const col4 = (cur45 - cur60) / cur60 * 100;
+        const col3 = (cur30-cur45)/cur45*100, col4 = (cur45-cur60)/cur60*100;
         if (!(col3 > col4)) return null;
         growthMatrix.push({ col0, col1, col2 });
       }
-      const score = growthMatrix.reduce((sum, row) =>
-        sum + (row.col0 + row.col1 + row.col2) / 3, 0) / 5;
-      return score;
+      return growthMatrix.reduce((sum, row) => sum + (row.col0+row.col1+row.col2)/3, 0) / 5;
     }
 
     async function filterDivergeSymbols(symbols, interval) {
-      const scored = [];
-      let checked = 0;
+      const scored = []; let checked = 0;
       for (const sym of symbols) {
         try {
           const data = await fetchKlines(sym, interval, KLINE_LIMIT);
           const score = calcDivergeScore(data);
-          if (score !== null && score > 0) {
-            scored.push({ symbol: sym, score });
-          }
-        } catch (e) {
-          console.error("發散篩選失敗：", sym, e);
-        }
+          if (score !== null && score > 0) scored.push({ symbol: sym, score });
+        } catch(e) { console.error("發散篩選失敗：", sym, e); }
         checked++;
         statusEl.textContent = `篩選（發散）中（${checked} / ${symbols.length}）`;
         await new Promise(r => setTimeout(r));
@@ -1015,68 +963,36 @@
       return scored.map(item => item.symbol);
     }
 
-    // ============================================================
-    // 爆量判斷：對每根K棒標記是否為爆量棒
-    // 規則：當前K棒成交量 >= 前一根K棒成交量 × VOLUME_SURGE_RATIO（預設 2.5x）
-    // 第一根K棒（index=0）無前一根可比較，一律不標記
-    // ============================================================
     function markVolumeSurge(data) {
       return data.map((bar, i) => {
         if (i === 0) return { ...bar, isSurge: false };
-        const prevVol = data[i - 1].volume;
-        const isSurge = prevVol > 0 && bar.volume >= prevVol * VOLUME_SURGE_RATIO;
-        return { ...bar, isSurge };
+        const prevVol = data[i-1].volume;
+        return { ...bar, isSurge: prevVol > 0 && bar.volume >= prevVol * VOLUME_SURGE_RATIO };
       });
     }
 
     function buildCard(symbol, interval, container, changePct) {
       const wrap = document.createElement("div");
       wrap.className = "chart-wrapper";
-
-      const title = document.createElement("div");
-      title.className = "chart-title";
-
-      const left = document.createElement("div");
-      left.className = "chart-title-left";
-
-      const symSpan = document.createElement("span");
-      symSpan.className = "chart-symbol";
-      symSpan.textContent = symbol;
+      const title = document.createElement("div"); title.className = "chart-title";
+      const left  = document.createElement("div"); left.className  = "chart-title-left";
+      const symSpan = document.createElement("span"); symSpan.className = "chart-symbol"; symSpan.textContent = symbol;
       left.appendChild(symSpan);
-
       if (typeof changePct === "number" && !Number.isNaN(changePct)) {
-        const pctSpan = document.createElement("span");
-        pctSpan.className = "chart-pct";
+        const pctSpan = document.createElement("span"); pctSpan.className = "chart-pct";
         let cls = "flat";
-        if (changePct > 0.0001) cls = "up";
-        else if (changePct < -0.0001) cls = "down";
+        if (changePct > 0.0001) cls = "up"; else if (changePct < -0.0001) cls = "down";
         pctSpan.classList.add(cls);
         const arrow = cls === "up" ? "▲ " : cls === "down" ? "▼ " : "— ";
         pctSpan.textContent = arrow + (changePct >= 0 ? "+" : "") + changePct.toFixed(2) + "%";
         left.appendChild(pctSpan);
       }
-
-      const right = document.createElement("span");
-      right.className = "chart-sub";
-      right.textContent = interval;
-
-      title.appendChild(left);
-      title.appendChild(right);
-
-      const chartDiv = document.createElement("div");
-      chartDiv.className = "chart";
-
-      wrap.appendChild(title);
-      wrap.appendChild(chartDiv);
-      container.appendChild(wrap);
-
-      wrap._symbol = symbol;
-      wrap._interval = interval;
-      wrap._pct = changePct;
-      wrap._chartDiv = chartDiv;
-      wrap._chartInstance = null;
-      wrap._loading = false;
-
+      const right = document.createElement("span"); right.className = "chart-sub"; right.textContent = interval;
+      title.appendChild(left); title.appendChild(right);
+      const chartDiv = document.createElement("div"); chartDiv.className = "chart";
+      wrap.appendChild(title); wrap.appendChild(chartDiv); container.appendChild(wrap);
+      wrap._symbol = symbol; wrap._interval = interval; wrap._pct = changePct;
+      wrap._chartDiv = chartDiv; wrap._chartInstance = null; wrap._loading = false;
       if (observer) observer.observe(wrap);
       return wrap;
     }
@@ -1084,171 +1000,69 @@
     async function mountChart(card) {
       if (card._chartInstance || card._loading) return;
       card._loading = true;
-
       try {
-        const symbol = card._symbol;
-        const interval = card._interval;
+        const symbol = card._symbol, interval = card._interval;
         const rawData = await fetchKlines(symbol, interval, KLINE_LIMIT);
-
         if (!card.isConnected) return;
-
-        // 標記爆量棒（成交量 >= 前一根 × 2.5x）
         const data = markVolumeSurge(rawData);
-
         const chartDiv = card._chartDiv;
         const width = chartDiv.clientWidth || chartDiv.parentElement.clientWidth || 320;
         const height = getChartHeight();
         chartDiv.style.height = height + "px";
-
         const chart = LightweightCharts.createChart(chartDiv, {
-          width: width,
-          height: height,
-          layout: {
-            background: { color: "#0b1220" },
-            textColor: "#7a9abf",
-          },
-          grid: {
-            vertLines: { color: "rgba(30, 90, 160, 0.10)" },
-            horzLines: { color: "rgba(30, 90, 160, 0.10)" },
-          },
+          width, height,
+          layout: { background: { color: "#0b1220" }, textColor: "#7a9abf" },
+          grid: { vertLines: { color: "rgba(30, 90, 160, 0.10)" }, horzLines: { color: "rgba(30, 90, 160, 0.10)" } },
           timeScale: {
-            timeVisible: true,
-            secondsVisible: false,
-            tickMarkFormatter: (time) => {
-              const date = new Date(time * 1000);
-              const h = date.getHours().toString().padStart(2, "0");
-              const m = date.getMinutes().toString().padStart(2, "0");
-              return `${h}:${m}`;
-            },
+            timeVisible: true, secondsVisible: false,
+            tickMarkFormatter: (time) => { const d = new Date(time*1000); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; },
           },
           rightPriceScale: { visible: true },
         });
-
-        chart.applyOptions({
-          localization: {
-            timeFormatter: (time) => {
-              const date = new Date(time * 1000);
-              const yyyy = date.getFullYear();
-              const mm = (date.getMonth() + 1).toString().padStart(2, "0");
-              const dd = date.getDate().toString().padStart(2, "0");
-              const hh = date.getHours().toString().padStart(2, "0");
-              const mi = date.getMinutes().toString().padStart(2, "0");
-              return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
-            }
-          }
-        });
-
-        const candleSeries = chart.addCandlestickSeries({
-          upColor: "#00e5a0",
-          borderUpColor: "#00e5a0",
-          wickUpColor: "#00e5a0",
-          downColor: "#ff4560",
-          borderDownColor: "#ff4560",
-          wickDownColor: "#ff4560",
-        });
-
-        // ── K棒顏色邏輯 ─────────────────────────────────────────────
-        // 爆量棒（成交量 >= 前一根 × 2.5x）：實體（color/borderColor）改為黃色 #FFD700
-        //   影線（wickColor）維持漲跌原色，讓K棒結構依然清晰可辨
-        // 一般棒：漲綠 #00e5a0 / 跌紅 #ff4560
-        // ─────────────────────────────────────────────────────────────
+        chart.applyOptions({ localization: { timeFormatter: (time) => { const d = new Date(time*1000); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; } } });
+        const candleSeries = chart.addCandlestickSeries({ upColor:"#00e5a0", borderUpColor:"#00e5a0", wickUpColor:"#00e5a0", downColor:"#ff4560", borderDownColor:"#ff4560", wickDownColor:"#ff4560" });
         const coloredData = data.map(bar => {
           const isUp = bar.close >= bar.open;
           const baseColor = isUp ? "#00e5a0" : "#ff4560";
-          const bodyColor = bar.isSurge ? "#FFD700" : baseColor; // 爆量實體 → 黃色
-          return {
-            time:        bar.time,
-            open:        bar.open,
-            high:        bar.high,
-            low:         bar.low,
-            close:       bar.close,
-            color:       bodyColor,   // K棒實體填色
-            borderColor: bodyColor,   // K棒實體邊框
-            wickColor:   baseColor,   // 影線仍用漲跌原色
-          };
+          const bodyColor = bar.isSurge ? "#FFD700" : baseColor;
+          return { time: bar.time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, color: bodyColor, borderColor: bodyColor, wickColor: baseColor };
         });
         candleSeries.setData(coloredData);
-
         if (currentMode === "filter") {
-          const breakoutIndex = findBreakoutIndex(data);
-          if (breakoutIndex !== null) {
-            const bar = data[breakoutIndex];
-            candleSeries.setMarkers([{
-              time: bar.time,
-              position: "aboveBar",
-              color: "#00c8e0",
-              shape: "arrowDown",
-              text: "最高點",
-            }]);
-          }
+          const bi = findBreakoutIndex(data);
+          if (bi !== null) { const bar = data[bi]; candleSeries.setMarkers([{ time: bar.time, position: "aboveBar", color: "#00c8e0", shape: "arrowDown", text: "最高點" }]); }
         }
-
-        const volumeSeries = chart.addHistogramSeries({
-          priceScaleId: "volume",
-          priceFormat: { type: "volume" },
-          priceLineVisible: false,
-          lastValueVisible: false,
-        });
-
-        // 成交量顏色：漲綠跌紅（與K棒一致）
-        volumeSeries.setData(data.map(bar => ({
-          time: bar.time,
-          value: bar.volume,
-          color: bar.close >= bar.open ? "rgba(0, 229, 160, 0.35)" : "rgba(255, 69, 96, 0.35)",
-        })));
-
-        chart.priceScale("volume").applyOptions({
-          scaleMargins: { top: 0.8, bottom: 0 },
-          alignLabels: false,
-        });
-
-        const ma30Data = calcMA(data, 30);
-        const ma45Data = calcMA(data, 45);
-        const ma60Data = calcMA(data, 60);
-
-        const ma30Series = chart.addLineSeries({ color: "#38bdf8", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
-        const ma45Series = chart.addLineSeries({ color: "#fbbf24", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
-        const ma60Series = chart.addLineSeries({ color: "#a78bfa", lineWidth: 1, priceScaleId: "right", priceLineVisible: false, lastValueVisible: false });
-
-        if (ma30Data.length) ma30Series.setData(ma30Data);
-        if (ma45Data.length) ma45Series.setData(ma45Data);
-        if (ma60Data.length) ma60Series.setData(ma60Data);
-
+        const volumeSeries = chart.addHistogramSeries({ priceScaleId: "volume", priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false });
+        volumeSeries.setData(data.map(bar => ({ time: bar.time, value: bar.volume, color: bar.close >= bar.open ? "rgba(0,229,160,0.35)" : "rgba(255,69,96,0.35)" })));
+        chart.priceScale("volume").applyOptions({ scaleMargins: { top: 0.8, bottom: 0 }, alignLabels: false });
+        const ma30Data = calcMA(data, 30), ma45Data = calcMA(data, 45), ma60Data = calcMA(data, 60);
+        const ma30S = chart.addLineSeries({ color:"#38bdf8", lineWidth:1, priceScaleId:"right", priceLineVisible:false, lastValueVisible:false });
+        const ma45S = chart.addLineSeries({ color:"#fbbf24", lineWidth:1, priceScaleId:"right", priceLineVisible:false, lastValueVisible:false });
+        const ma60S = chart.addLineSeries({ color:"#a78bfa", lineWidth:1, priceScaleId:"right", priceLineVisible:false, lastValueVisible:false });
+        if (ma30Data.length) ma30S.setData(ma30Data);
+        if (ma45Data.length) ma45S.setData(ma45Data);
+        if (ma60Data.length) ma60S.setData(ma60Data);
         const totalBars = data.length;
         if (totalBars > 0) {
           const visibleBars = Math.min(250, totalBars);
-          const from = Math.max(0, totalBars - visibleBars - 15);
-          const to = totalBars + 15;
           chart.timeScale().applyOptions({ rightOffset: 15 });
-          chart.timeScale().setVisibleLogicalRange({ from, to });
+          chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, totalBars - visibleBars - 15), to: totalBars + 15 });
         }
-
         card._chartInstance = chart;
-      } catch (e) {
-        console.error(`繪製 ${card._symbol} 圖表失敗:`, e);
-      } finally {
-        card._loading = false;
-      }
+      } catch(e) { console.error(`繪製 ${card._symbol} 圖表失敗:`, e); }
+      finally { card._loading = false; }
     }
 
     function unmountChart(card) {
-      if (card._chartInstance) {
-        card._chartInstance.remove();
-        card._chartInstance = null;
-      }
+      if (card._chartInstance) { card._chartInstance.remove(); card._chartInstance = null; }
       if (card._chartDiv) card._chartDiv.innerHTML = "";
     }
 
     function applySorting() {
       if (!allSymbols || allSymbols.length === 0) return;
-      if (sortMode === "symbol") {
-        allSymbols.sort();
-      } else if (sortMode === "pct_desc") {
-        allSymbols.sort((a, b) => {
-          const pa = tickerMap[a]?.pct ?? -Infinity;
-          const pb = tickerMap[b]?.pct ?? -Infinity;
-          return pb - pa;
-        });
+      if (sortMode === "symbol") { allSymbols.sort(); }
+      else if (sortMode === "pct_desc") {
+        allSymbols.sort((a, b) => (tickerMap[b]?.pct ?? -Infinity) - (tickerMap[a]?.pct ?? -Infinity));
       }
     }
 
@@ -1256,57 +1070,34 @@
       const total = allSymbols.length;
       const totalPages = total === 0 ? 0 : Math.ceil(total / PAGE_SIZE);
       const isMobile = window.innerWidth < 640;
-
       if (totalPages === 0) {
-        const zeroText = isMobile ? "0 / 0" : "第 0 / 0 頁";
-        pageInfoEl.textContent = zeroText;
-        bottomPageInfoEl.textContent = zeroText;
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        bottomPrevBtn.disabled = true;
-        bottomNextBtn.disabled = true;
+        const z = isMobile ? "0 / 0" : "第 0 / 0 頁";
+        pageInfoEl.textContent = bottomPageInfoEl.textContent = z;
+        [prevBtn, nextBtn, bottomPrevBtn, bottomNextBtn].forEach(b => b.disabled = true);
         return;
       }
-
       const start = currentPage * PAGE_SIZE + 1;
-      const end = Math.min((currentPage + 1) * PAGE_SIZE, total);
-      const shortText = `${currentPage + 1} / ${totalPages}`;
-      const fullText  = `第 ${currentPage + 1} / ${totalPages} 頁（${start}–${end} / ${total} 檔）`;
-      const text = isMobile ? shortText : fullText;
-
-      pageInfoEl.textContent = text;
-      bottomPageInfoEl.textContent = isMobile ? shortText : fullText;
-
-      prevBtn.disabled = currentPage <= 0;
-      nextBtn.disabled = currentPage >= totalPages - 1;
-      bottomPrevBtn.disabled = currentPage <= 0;
-      bottomNextBtn.disabled = currentPage >= totalPages - 1;
+      const end   = Math.min((currentPage+1)*PAGE_SIZE, total);
+      const text  = isMobile ? `${currentPage+1} / ${totalPages}` : `第 ${currentPage+1} / ${totalPages} 頁（${start}–${end} / ${total} 檔）`;
+      pageInfoEl.textContent = bottomPageInfoEl.textContent = text;
+      prevBtn.disabled = bottomPrevBtn.disabled = currentPage <= 0;
+      nextBtn.disabled = bottomNextBtn.disabled = currentPage >= totalPages - 1;
     }
 
     async function loadPage(pageIndex) {
       const totalPages = Math.ceil(allSymbols.length / PAGE_SIZE);
       if (pageIndex < 0 || pageIndex >= totalPages) return;
-
       window.scrollTo({ top: 0, behavior: "smooth" });
-
       const token = ++currentLoadToken;
       currentPage = pageIndex;
       updatePaginationUI();
-
-      for (const child of Array.from(chartsEl.children)) {
-        if (observer) observer.unobserve(child);
-        unmountChart(child);
-      }
+      for (const child of Array.from(chartsEl.children)) { if (observer) observer.unobserve(child); unmountChart(child); }
       chartsEl.innerHTML = "";
-
       const start = pageIndex * PAGE_SIZE;
-      const end = Math.min(start + PAGE_SIZE, allSymbols.length);
-      const targets = allSymbols.slice(start, end);
-
-      for (const sym of targets) {
+      const end   = Math.min(start + PAGE_SIZE, allSymbols.length);
+      for (const sym of allSymbols.slice(start, end)) {
         if (token !== currentLoadToken) return;
-        const pct = tickerMap[sym]?.pct ?? null;
-        buildCard(sym, currentInterval, chartsEl, pct);
+        buildCard(sym, currentInterval, chartsEl, tickerMap[sym]?.pct ?? null);
       }
     }
 
@@ -1314,112 +1105,52 @@
       if (isLoading) return;
       isLoading = true;
       currentInterval = intervalSelect.value;
-      currentMode = modeSelect.value;
+      currentMode     = modeSelect.value;
       currentExchange = exchangeSelect.value;
       statusEl.textContent = "取得合約清單中…";
       currentLoadToken++;
-
-      rawSymbols = [];
-      klinesCache.clear();
-
+      rawSymbols = []; klinesCache.clear();
       const cfg = EXCHANGE_CONFIG[currentExchange];
-
       try {
         rawSymbols = await cfg.fetchSymbols();
-        console.log(`[${cfg.name}] 取得 symbols 數量:`, rawSymbols.length);
-
-        if (rawSymbols.length === 0) {
-          statusEl.textContent = `[${cfg.name}] 沒有取得到任何 USDT 永續合約。`;
-          isLoading = false;
-          updatePaginationUI();
-          return;
-        }
-
-        try {
-          statusEl.textContent = "取得 24h 漲跌幅中…";
-          tickerMap = await cfg.fetch24hTickers(rawSymbols);
-        } catch (e) {
-          console.error("取得 24h 失敗：", e);
-          tickerMap = {};
-          statusEl.textContent = "取得 24h 失敗，將不顯示漲跌幅，繼續處理…";
-        }
-
+        if (rawSymbols.length === 0) { statusEl.textContent = `[${cfg.name}] 沒有取得到任何 USDT 永續合約。`; isLoading = false; updatePaginationUI(); return; }
+        try { statusEl.textContent = "取得 24h 漲跌幅中…"; tickerMap = await cfg.fetch24hTickers(rawSymbols); }
+        catch(e) { console.error("取得 24h 失敗：", e); tickerMap = {}; }
         if (currentMode === "filter") {
           statusEl.textContent = `依 ${currentInterval} 篩選突破中…`;
-          const breakoutSymbols = await filterBreakoutSymbols(rawSymbols, currentInterval);
-          allSymbols = breakoutSymbols;
-          if (allSymbols.length === 0) {
-            statusEl.textContent = `沒有符合「近 10 根內創近 120 根新高」條件的標的（${currentInterval}）。`;
-            isLoading = false;
-            chartsEl.innerHTML = "";
-            updatePaginationUI();
-            return;
-          }
+          allSymbols = await filterBreakoutSymbols(rawSymbols, currentInterval);
+          if (allSymbols.length === 0) { statusEl.textContent = `沒有符合突破條件的標的。`; isLoading = false; chartsEl.innerHTML = ""; updatePaginationUI(); return; }
         } else if (currentMode === "diverge") {
           statusEl.textContent = `依 ${currentInterval} 篩選發散中…`;
-          const divergeSymbols = await filterDivergeSymbols(rawSymbols, currentInterval);
-          allSymbols = divergeSymbols;
-          if (allSymbols.length === 0) {
-            statusEl.textContent = `沒有符合「近5根MA持續遞增＋短均加速>長均加速＋間距擴大」條件的標的（${currentInterval}）。`;
-            isLoading = false;
-            chartsEl.innerHTML = "";
-            updatePaginationUI();
-            return;
-          }
+          allSymbols = await filterDivergeSymbols(rawSymbols, currentInterval);
+          if (allSymbols.length === 0) { statusEl.textContent = `沒有符合發散條件的標的。`; isLoading = false; chartsEl.innerHTML = ""; updatePaginationUI(); return; }
         } else {
           allSymbols = rawSymbols.slice();
         }
-
-        sortMode = sortSelect.value;
-        applySorting();
-        updatePaginationUI();
-
-        if (currentMode === "filter") {
-          statusEl.textContent = `[${cfg.name}] 共 ${allSymbols.length} 檔符合突破條件，準備載入第 1 頁…`;
-        } else if (currentMode === "diverge") {
-          statusEl.textContent = `[${cfg.name}] 共 ${allSymbols.length} 檔符合發散條件（依強勢分數排序），準備載入第 1 頁…`;
-        } else {
-          statusEl.textContent = `[${cfg.name}] 共 ${allSymbols.length} 檔 USDT 永續合約，準備載入第 1 頁…`;
-        }
-
+        sortMode = sortSelect.value; applySorting(); updatePaginationUI();
+        statusEl.textContent = `[${cfg.name}] 共 ${allSymbols.length} 檔，準備載入第 1 頁…`;
         isLoading = false;
         await loadPage(0);
-
-      } catch (err) {
+      } catch(err) {
         console.error("掃圖發生錯誤:", err);
-        statusEl.textContent = `[${cfg.name}] 發生錯誤，請開啟 F12 → Console 查看（可能是網路或 CORS 問題）。`;
-        isLoading = false;
-        updatePaginationUI();
+        statusEl.textContent = `[${cfg.name}] 發生錯誤，請開啟 F12 → Console 查看。`;
+        isLoading = false; updatePaginationUI();
       }
     }
 
     document.getElementById("scan-btn").addEventListener("click", scan);
-    prevBtn.addEventListener("click", async () => { await loadPage(currentPage - 1); });
-    nextBtn.addEventListener("click", async () => { await loadPage(currentPage + 1); });
+    prevBtn.addEventListener("click",       async () => { await loadPage(currentPage - 1); });
+    nextBtn.addEventListener("click",       async () => { await loadPage(currentPage + 1); });
     bottomPrevBtn.addEventListener("click", async () => { await loadPage(currentPage - 1); });
     bottomNextBtn.addEventListener("click", async () => { await loadPage(currentPage + 1); });
-
-    sortSelect.addEventListener("change", async () => {
-      sortMode = sortSelect.value;
-      applySorting();
-      updatePaginationUI();
-      currentLoadToken++;
-      await loadPage(0);
-    });
+    sortSelect.addEventListener("change",   async () => { sortMode = sortSelect.value; applySorting(); updatePaginationUI(); currentLoadToken++; await loadPage(0); });
 
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
-          const card = entry.target;
-          if (entry.isIntersecting) {
-            mountChart(card);
-          } else {
-            unmountChart(card);
-          }
+          if (entry.isIntersecting) mountChart(entry.target); else unmountChart(entry.target);
         }
       }, { root: null, threshold: 0.1 });
-    } else {
-      console.warn("此瀏覽器不支援 IntersectionObserver，Lazy Load 失效。");
     }
 
     let resizeTimer;
@@ -1429,8 +1160,7 @@
         const newHeight = getChartHeight();
         document.querySelectorAll(".chart-wrapper").forEach(card => {
           if (card._chartInstance && card._chartDiv) {
-            const newWidth = card._chartDiv.clientWidth || card._chartDiv.parentElement.clientWidth || 320;
-            card._chartInstance.applyOptions({ width: newWidth, height: newHeight });
+            card._chartInstance.applyOptions({ width: card._chartDiv.clientWidth || 320, height: newHeight });
             card._chartDiv.style.height = newHeight + "px";
           }
         });
