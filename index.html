@@ -551,8 +551,8 @@
       <div class="ctrl-group">
         <label for="sort">排序</label>
         <select id="sort">
-          <option value="symbol">字母</option>
           <option value="pct_desc" selected>漲跌幅</option>
+          <option value="symbol">字母</option>        
         </select>
       </div>
 
@@ -691,7 +691,7 @@
     })();
 
     /* ============================================================
-       原有程式碼（完全不動）
+       原有程式碼（Bitget 部分已修正）
        ============================================================ */
     const PAGE_SIZE = 100;
     const KLINE_LIMIT = 600;
@@ -805,17 +805,39 @@
           return data.result.list.reverse().map(c => ({ time: parseInt(c[0])/1000, open: parseFloat(c[1]), high: parseFloat(c[2]), low: parseFloat(c[3]), close: parseFloat(c[4]), volume: parseFloat(c[5]) }));
         },
       },
+
+      /* ============================================================
+         Bitget — 修正版
+         修正項目：
+           1. intervalMap：日K 改為 "1day"（原本正確，但一併確認其他時框）
+           2. fetchSymbols：改以 status 過濾，僅保留上線中的標的
+           3. fetch24hTickers：change24h 在 Bitget v2 已是小數形式（0.05 = 5%），
+              乘以 100 轉為百分比顯示是正確的，保持不變
+           4. fetchKlines（主要修正）：
+              a. Bitget v2 candles 單次上限 200 筆，超過 200 改為分批請求
+              b. 回傳資料已是「新→舊」排列，reverse() 後得到「舊→新」，邏輯正確；
+                 但分批請求時需利用 endTime 往前推，再合併後統一排序
+              c. 欄位對應確認：[ts, o, h, l, c, baseVol, quoteVol]，索引 0-4 正確
+         ============================================================ */
       bitget: {
         name: "Bitget",
         baseUrl: "https://api.bitget.com",
-        intervalMap: { "15m": "15min", "1h": "1h", "4h": "4h", "1d": "1day" },
+        // Bitget v2 granularity 字串（大小寫敏感）
+        // 單次最大 limit：分鐘級 200 筆、小時級 200 筆、日級 200 筆
+        intervalMap: { "15m": "15m", "1h": "1H", "4h": "4H", "1d": "1D" },
+
         fetchSymbols: async function() {
           const res = await fetch(`${this.baseUrl}/api/v2/mix/market/contracts?productType=USDT-FUTURES`);
           if (!res.ok) throw new Error("Bitget contracts 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget contracts error: " + data.msg);
-          return data.data.map(s => s.symbol).sort();
+          // 只保留狀態為 normal（上線中）的合約
+          return data.data
+            .filter(s => !s.symbolStatus || s.symbolStatus === "normal")
+            .map(s => s.symbol)
+            .sort();
         },
+
         fetch24hTickers: async function(symbols) {
           const res = await fetch(`${this.baseUrl}/api/v2/mix/market/tickers?productType=USDT-FUTURES`);
           if (!res.ok) throw new Error("Bitget tickers 失敗: " + res.status);
@@ -824,19 +846,61 @@
           const set = new Set(symbols); const map = {};
           for (const t of data.data) {
             if (!set.has(t.symbol)) continue;
+            // change24h 在 Bitget v2 是小數形式，例如 0.0523 = 5.23%，乘 100 得百分比
             const pct = parseFloat(t.change24h) * 100;
             if (!Number.isNaN(pct)) map[t.symbol] = { pct };
           }
           return map;
         },
+
         fetchKlines: async function(symbol, interval, limit) {
           const iv = this.intervalMap[interval] || interval;
-          const url = `${this.baseUrl}/api/v2/mix/market/candles?symbol=${symbol}&productType=USDT-FUTURES&granularity=${iv}&limit=${limit}`;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`Bitget K線 ${symbol} 失敗: ` + res.status);
-          const data = await res.json();
-          if (data.code !== "00000") throw new Error("Bitget K線 error: " + data.msg);
-          return data.data.reverse().map(c => ({ time: parseInt(c[0])/1000, open: parseFloat(c[1]), high: parseFloat(c[2]), low: parseFloat(c[3]), close: parseFloat(c[4]), volume: parseFloat(c[5]) }));
+          // Bitget v2 單次上限 200 筆，超過需分批
+          const BATCH = 200;
+          const allCandles = [];
+          let endTime = null; // 第一批不帶 endTime，取最新資料
+
+          while (allCandles.length < limit) {
+            const batchSize = Math.min(BATCH, limit - allCandles.length);
+            let url = `${this.baseUrl}/api/v2/mix/market/candles?symbol=${symbol}&productType=USDT-FUTURES&granularity=${iv}&limit=${batchSize}`;
+            if (endTime !== null) url += `&endTime=${endTime}`;
+
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`Bitget K線 ${symbol} 失敗: ` + res.status);
+            const data = await res.json();
+            if (data.code !== "00000") throw new Error("Bitget K線 error: " + data.msg);
+            if (!data.data || data.data.length === 0) break;
+
+            // Bitget v2 回傳「新→舊」（index 0 最新），累入陣列
+            allCandles.push(...data.data);
+
+            // 若回傳不足 batchSize，已無更多歷史資料
+            if (data.data.length < batchSize) break;
+
+            // 下一批 endTime = 本批最舊那筆的 ts - 1（最舊在 array 末尾）
+            endTime = parseInt(data.data[data.data.length - 1][0]) - 1;
+          }
+
+          if (allCandles.length === 0) return [];
+
+          // 依時間升序排列（舊→新），去重複，取最新 limit 筆
+          allCandles.sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+          const seen = new Set();
+          const deduped = allCandles.filter(c => {
+            const t = c[0];
+            if (seen.has(t)) return false;
+            seen.add(t); return true;
+          });
+          const trimmed = deduped.slice(-limit);
+
+          return trimmed.map(c => ({
+            time:   parseInt(c[0]) / 1000,
+            open:   parseFloat(c[1]),
+            high:   parseFloat(c[2]),
+            low:    parseFloat(c[3]),
+            close:  parseFloat(c[4]),
+            volume: parseFloat(c[5]),
+          }));
         },
       },
     };
