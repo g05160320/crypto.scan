@@ -831,9 +831,9 @@
           if (!res.ok) throw new Error("Bitget contracts 失敗: " + res.status);
           const data = await res.json();
           if (data.code !== "00000") throw new Error("Bitget contracts error: " + data.msg);
-          // 只保留狀態為 normal（上線中）的合約
+          // 只保留永續合約（symbolType === "perpetual"）且狀態正常的標的
           return data.data
-            .filter(s => !s.symbolStatus || s.symbolStatus === "normal")
+            .filter(s => s.symbolType === "perpetual" && (!s.symbolStatus || s.symbolStatus === "normal"))
             .map(s => s.symbol)
             .sort();
         },
